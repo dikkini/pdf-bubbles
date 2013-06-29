@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:magic="http://schemas.android.com/apk/res/com.magic">
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+        <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+            <ImageView
+                    android:layout_width="fill_parent"
+                    android:layout_height="451dp"
+                    android:id="@+id/bubbleview_imageview"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentRight="true"/>
+
+            <view
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    class="com.magic.views.BubbleView"
+                    android:id="@+id/bubbleview_bubble"
+                    android:layout_gravity="left|center_vertical"
+                    android:layout_alignBottom="@+id/bubbleview_imageview"
+                    android:visibility="gone"
+                    magic:angle="180"/>
+
+            <HorizontalScrollView
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:id="@+id/horizontalScrollView"
+                    android:layout_below="@+id/bubbleview_imageview"
+                    android:layout_alignParentLeft="true">
+
+                <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                    <ImageView
+                            android:layout_width="75dp"
+                            android:layout_height="fill_parent"
+                            android:id="@+id/bubble_imageview_menu_1"/>
+
+                    <ImageView
+                            android:layout_width="75dp"
+                            android:layout_height="fill_parent"
+                            android:id="@+id/bubble_imageview_menu_2"/>
+
+                    <ImageView
+                            android:layout_width="75dp"
+                            android:layout_height="fill_parent"
+                            android:id="@+id/bubble_imageview_menu_3"/>
+
+                    <ImageView
+                            android:layout_width="75dp"
+                            android:layout_height="fill_parent"
+                            android:id="@+id/bubble_imageview_menu_4"/>
+
+                    <ImageView
+                            android:layout_width="75dp"
+                            android:layout_height="fill_parent"
+                            android:id="@+id/bubble_imageview_menu_5"/>
+
+                    <ImageView
+                            android:layout_width="75dp"
+                            android:layout_height="fill_parent"
+                            android:id="@+id/bubble_imageview_menu_6"/>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+        </RelativeLayout>
+
+    </LinearLayout>
+</RelativeLayout>

@@ -1,0 +1,11 @@
+/.idea/
+/.settings/
+/bin/
+/gen/
+/out/
+/assets/
+.project
+.classpath
+magic.iml
+proguard-project.txt
+project.properties
