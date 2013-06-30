@@ -10,11 +10,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.text.Editable;
 import android.util.AttributeSet;
+import android.util.FloatMath;
+import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
@@ -23,9 +26,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.magic.BitmapUtils;
+import com.magic.utils.BitmapSizeHelper;
 
 public final class BubbleView extends ImageView {
-    private Paint drawablePaint = new Paint();
+    private Paint drawablePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private Rect drawableRect = new Rect();
     private Paint textPaint = new Paint();
     private Bitmap sourceImage, image;
@@ -39,6 +43,22 @@ public final class BubbleView extends ImageView {
     private float mDownX;
     private float mDownY;
     private final float SCROLL_TRESHOLD = 10;
+
+    public static final int NONE = 0;
+    public static final int DRAG = 1;
+    public static final int ZOOM = 2;
+    public static int mode = NONE;
+    float oldDist;
+
+    float x;
+    float y;
+
+    private Matrix scaleMatrix;
+    float ratioX;
+    float ratioY;
+    float middleX;
+    float middleY;
+    boolean resizing = false;
 
     public BubbleView(Context context) {
         super(context);
@@ -66,9 +86,9 @@ public final class BubbleView extends ImageView {
             textPaint.setColor(Color.BLACK);
             textPaint.setTextSize(20);
             int lengthText = text.length();
-            mScaledImageWidth = sourceImage.getWidth() + lengthText*2;
-            mScaledImageHeight = sourceImage.getHeight() + lengthText;
-            Bitmap mutableBitmap = sourceImage.copy(Bitmap.Config.ARGB_8888, true);
+            mScaledImageWidth = image.getWidth() + lengthText*2;
+            mScaledImageHeight = image.getHeight() + lengthText;
+            Bitmap mutableBitmap = image.copy(Bitmap.Config.ARGB_8888, true);
             mutableBitmap = BitmapUtils.getScaledBitmap(mutableBitmap, mScaledImageWidth,
                     mScaledImageHeight).copy(Bitmap.Config.ARGB_8888, true);
             Canvas canvas = new Canvas(mutableBitmap);
@@ -99,6 +119,7 @@ public final class BubbleView extends ImageView {
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
+                mode = DRAG;
                 isOnClick = true;
                 canImageMove = true;
                 prevX = positionX;
@@ -106,6 +127,13 @@ public final class BubbleView extends ImageView {
                 // for listen on click tap
                 mDownX = event.getX();
                 mDownY = event.getY();
+                break;
+
+            case MotionEvent.ACTION_POINTER_DOWN:
+                oldDist = spacing(event);
+                if (oldDist > 10f) {
+                    mode = ZOOM;
+                }
                 break;
 
             case MotionEvent.ACTION_MOVE:
@@ -117,7 +145,7 @@ public final class BubbleView extends ImageView {
                     final int distY = Math.abs(positionY - prevY);
                     final int distX = Math.abs(positionX - prevX);
 
-                    if (distX > mTouchSlop || distY > mTouchSlop) {
+                    if (mode == DRAG && (distX > mTouchSlop || distY > mTouchSlop)) {
                         int deltaX = positionX - prevX;
                         int deltaY = positionY - prevY;
                         // Check if delta is added, is the rectangle is within the visible screen
@@ -139,12 +167,25 @@ public final class BubbleView extends ImageView {
 
                             invalidate();
                         }
+                    } else if (mode == ZOOM) {
+                        float newDist2 = spacing(event);
+                        if (newDist2 > 10f) {
+                            mScaledImageHeight = (int) (newDist2 / oldDist * mImageHeight);
+                            mScaledImageWidth = (int) (newDist2 / oldDist * mImageWidth);
+
+/*                            int i = BitmapUtils.computeSampleSize(oldDist / newDist2);
+                            this.image = BitmapUtils.resizeAndCropCenter(image, i, true);*/
+
+                            scaleImage(image);
+
+                        }
                     }
                 }
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 canImageMove = false;
+                mode = NONE;
                 if (isOnClick) {
                     final EditText input = new EditText(mContext);
                     new AlertDialog.Builder(mContext)
@@ -169,6 +210,34 @@ public final class BubbleView extends ImageView {
         return true;
     }
 
+    public void scaleImage(Bitmap image) {
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;
+
+/*        this.image = Bitmap.createBitmap(mScaledImageWidth, mScaledImageHeight, Bitmap.Config.ARGB_8888);*/
+        this.image = BitmapSizeHelper.createScaledBitmap(image, mScaledImageWidth,
+                mScaledImageHeight, BitmapSizeHelper.ScalingLogic.FIT);
+
+        ratioX = mScaledImageWidth / (float) image.getWidth();
+        ratioY = mScaledImageHeight / (float) image.getHeight();
+        middleX = mScaledImageWidth / 2.0f;
+        middleY = mScaledImageHeight / 2.0f;
+
+        scaleMatrix = new Matrix();
+        scaleMatrix.setScale(ratioX, ratioY, middleX, middleY);
+
+        if (mScaledImageWidth == 0 && mScaledImageHeight == 0) {
+            mImagePosition.right = mImagePosition.left + mImageWidth;
+            mImagePosition.bottom = mImagePosition.top + mImageHeight;
+        } else {
+            mImagePosition.right = mImagePosition.left + mScaledImageWidth;
+            mImagePosition.bottom = mImagePosition.top + mScaledImageHeight;
+        }
+        mImageRegion.setEmpty();
+        mImageRegion.set(mImagePosition);
+        invalidate();
+    }
+
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -184,9 +253,13 @@ public final class BubbleView extends ImageView {
             return;
         }
 
-        drawablePaint.setFilterBitmap(true);
+        drawablePaint.setAntiAlias(false);
+        drawablePaint.setFilterBitmap(false);
+        drawablePaint.setDither(true);
+
         drawableRect.setEmpty();
         drawableRect.set(0, 0, image.getWidth(), image.getHeight());
+
         canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
     }
 
@@ -196,5 +269,16 @@ public final class BubbleView extends ImageView {
 
     public void setColorFilter(ColorFilter cf) {
         textPaint.setColorFilter(cf);
+    }
+
+    private float spacing(MotionEvent event) {
+        try {
+            x = event.getX(0) - event.getX(1);
+            y = event.getY(0) - event.getY(1);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            Log.d("spacing", "pointerIndex exception");
+        }
+        return FloatMath.sqrt(x * x + y * y);
     }
 }
