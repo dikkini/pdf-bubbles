@@ -10,7 +10,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Region;
@@ -26,8 +25,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.magic.BitmapUtils;
-import com.magic.utils.BitmapSizeHelper;
 
+//TODO GLOBAL refactor
 public final class BubbleView extends ImageView {
     private Paint drawablePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private Rect drawableRect = new Rect();
@@ -36,29 +35,29 @@ public final class BubbleView extends ImageView {
     private Context mContext;
     private int mScreenHeight, mScreenWidth, prevY, prevX, mImageWidth, mImageHeight, mTouchSlop,
             mScaledImageWidth, mScaledImageHeight;
+    // TODO rename it
     private int startX, startY = 10;
     private Rect mImagePosition;
     private Region mImageRegion;
     private boolean canImageMove, isOnClick;
     private float mDownX;
     private float mDownY;
+
+    // TODO ??? what is treshold? why treshold?
     private final float SCROLL_TRESHOLD = 10;
 
     public static final int NONE = 0;
     public static final int DRAG = 1;
     public static final int ZOOM = 2;
-    public static int mode = NONE;
+    public static int MODE = NONE;
+    // TODO rename
     float oldDist;
 
     float x;
     float y;
 
-    private Matrix scaleMatrix;
-    float ratioX;
-    float ratioY;
-    float middleX;
-    float middleY;
-    boolean resizing = false;
+    private int drawableId;
+    private BitmapFactory.Options options;
 
     public BubbleView(Context context) {
         super(context);
@@ -103,7 +102,10 @@ public final class BubbleView extends ImageView {
     }
 
     public void setBubbleDrawable(int drawableId) {
-        sourceImage = image = BitmapFactory.decodeResource(mContext.getResources(), drawableId);
+        this.drawableId = drawableId;
+        options = new BitmapFactory.Options();
+        options.inScaled = false;
+        sourceImage = image = BitmapFactory.decodeResource(mContext.getResources(), this.drawableId, options);
         mImageHeight = image.getHeight();
         mImageWidth = image.getWidth();
         mImagePosition = new Rect(startX, startY, mImageWidth, mImageHeight);
@@ -119,7 +121,7 @@ public final class BubbleView extends ImageView {
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
-                mode = DRAG;
+                MODE = DRAG;
                 isOnClick = true;
                 canImageMove = true;
                 prevX = positionX;
@@ -131,8 +133,10 @@ public final class BubbleView extends ImageView {
 
             case MotionEvent.ACTION_POINTER_DOWN:
                 oldDist = spacing(event);
+
+                // TODO constant
                 if (oldDist > 10f) {
-                    mode = ZOOM;
+                    MODE = ZOOM;
                 }
                 break;
 
@@ -145,7 +149,7 @@ public final class BubbleView extends ImageView {
                     final int distY = Math.abs(positionY - prevY);
                     final int distX = Math.abs(positionX - prevX);
 
-                    if (mode == DRAG && (distX > mTouchSlop || distY > mTouchSlop)) {
+                    if (MODE == DRAG && (distX > mTouchSlop || distY > mTouchSlop)) {
                         int deltaX = positionX - prevX;
                         int deltaY = positionY - prevY;
                         // Check if delta is added, is the rectangle is within the visible screen
@@ -154,6 +158,7 @@ public final class BubbleView extends ImageView {
                             // invalidate current position as we are moving...
                             mImagePosition.left = mImagePosition.left + deltaX;
                             mImagePosition.top = mImagePosition.top + deltaY;
+                            // TODO method
                             if (mScaledImageWidth == 0 && mScaledImageHeight == 0) {
                                 mImagePosition.right = mImagePosition.left + mImageWidth;
                                 mImagePosition.bottom = mImagePosition.top + mImageHeight;
@@ -167,17 +172,14 @@ public final class BubbleView extends ImageView {
 
                             invalidate();
                         }
-                    } else if (mode == ZOOM) {
+                    } else if (MODE == ZOOM) {
                         float newDist2 = spacing(event);
+                        // TODO constant
                         if (newDist2 > 10f) {
                             mScaledImageHeight = (int) (newDist2 / oldDist * mImageHeight);
                             mScaledImageWidth = (int) (newDist2 / oldDist * mImageWidth);
 
-/*                            int i = BitmapUtils.computeSampleSize(oldDist / newDist2);
-                            this.image = BitmapUtils.resizeAndCropCenter(image, i, true);*/
-
-                            scaleImage(image);
-
+                            scaleImage();
                         }
                     }
                 }
@@ -185,7 +187,7 @@ public final class BubbleView extends ImageView {
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 canImageMove = false;
-                mode = NONE;
+                MODE = NONE;
                 if (isOnClick) {
                     final EditText input = new EditText(mContext);
                     new AlertDialog.Builder(mContext)
@@ -210,22 +212,17 @@ public final class BubbleView extends ImageView {
         return true;
     }
 
-    public void scaleImage(Bitmap image) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inScaled = false;
+    public void scaleImage() {
+        // на случай если пользователь захочет уменьшить до нуля размер изображения
+        if (mScaledImageHeight <= 0 || mScaledImageWidth <= 0) {
+            mScaledImageHeight = startY;
+            mScaledImageWidth = startX;
+        }
+        // TODO constant
+        options.inTargetDensity = 0;
 
-/*        this.image = Bitmap.createBitmap(mScaledImageWidth, mScaledImageHeight, Bitmap.Config.ARGB_8888);*/
-        this.image = BitmapSizeHelper.createScaledBitmap(image, mScaledImageWidth,
-                mScaledImageHeight, BitmapSizeHelper.ScalingLogic.FIT);
-
-        ratioX = mScaledImageWidth / (float) image.getWidth();
-        ratioY = mScaledImageHeight / (float) image.getHeight();
-        middleX = mScaledImageWidth / 2.0f;
-        middleY = mScaledImageHeight / 2.0f;
-
-        scaleMatrix = new Matrix();
-        scaleMatrix.setScale(ratioX, ratioY, middleX, middleY);
-
+        this.image = BitmapFactory.decodeResource(mContext.getResources(), this.drawableId, options);
+        // TODO method
         if (mScaledImageWidth == 0 && mScaledImageHeight == 0) {
             mImagePosition.right = mImagePosition.left + mImageWidth;
             mImagePosition.bottom = mImagePosition.top + mImageHeight;
@@ -233,6 +230,7 @@ public final class BubbleView extends ImageView {
             mImagePosition.right = mImagePosition.left + mScaledImageWidth;
             mImagePosition.bottom = mImagePosition.top + mScaledImageHeight;
         }
+
         mImageRegion.setEmpty();
         mImageRegion.set(mImagePosition);
         invalidate();
