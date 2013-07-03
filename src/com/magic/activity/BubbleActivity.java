@@ -7,8 +7,9 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 
 import com.magic.BitmapUtils;
 import com.magic.R;
@@ -21,24 +22,41 @@ import java.io.File;
  */
 public class BubbleActivity extends Activity {
 
-    private ImageView imageView;
     private BubbleView bubbleView;
+    private SeekBar seekAlpha;
+    private SeekBar seekColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bubble);
 
-        imageView = (ImageView) findViewById(R.id.bubbleview_imageview);
+        ImageView imageView = (ImageView) findViewById(R.id.bubbleview_imageview);
         bubbleView = (BubbleView) findViewById(R.id.bubbleview_bubble);
 
-        String photoPath = "/storage/emulated/0/DCIM/Camera/IMG_20130423_165339.jpg";
+        seekAlpha = (SeekBar) findViewById(R.id.seekAlpha);
+        seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubbleView));
+
+        seekColor = (SeekBar) findViewById(R.id.seekColor);
+        seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(bubbleView));
+
+        Button alphaColorBtn = (Button) findViewById(R.id.bubbleview_alpha_color_button);
+
+        String photoPath = "/storage/sdcard0/DCIM/Camera/ContactPhoto-IMG_20130417_102638.jpg";
 
         File photoFile = new File(photoPath);
         Bitmap photo = BitmapUtils.decodeFile(photoFile, 1024, 1024, false);
         imageView.setImageBitmap(photo);
 
         registerForContextMenu(imageView);
+
+        alphaColorBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                seekAlpha.setVisibility(View.VISIBLE);
+                seekColor.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @Override

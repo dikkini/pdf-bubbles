@@ -6,77 +6,96 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:magic="http://schemas.android.com/apk/res/com.magic">
 
-    <LinearLayout
-            android:orientation="vertical"
+    <RelativeLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
+            android:layout_height="320dp"
+            android:id="@+id/relativeLayout"
+            android:layout_above="@+id/seekAlpha"
+            android:layout_alignParentTop="true">
 
-        <RelativeLayout
+        <ImageView
                 android:layout_width="fill_parent"
-                android:layout_height="fill_parent">
+                android:layout_height="431dp"
+                android:id="@+id/bubbleview_imageview"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentRight="true"/>
 
-            <ImageView
-                    android:layout_width="fill_parent"
-                    android:layout_height="451dp"
-                    android:id="@+id/bubbleview_imageview"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentRight="true"/>
+        <view
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                class="com.magic.views.BubbleView"
+                android:id="@+id/bubbleview_bubble"
+                android:layout_gravity="left|center_vertical"
+                android:layout_alignBottom="@+id/bubbleview_imageview"
+                android:visibility="gone"
+                magic:angle="180"/>
 
-            <view
-                    android:layout_width="fill_parent"
+    </RelativeLayout>
+
+    <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekColor"
+            android:progress="12"
+            android:indeterminate="false"
+            android:indeterminateOnly="false"
+            android:max="12"
+            android:focusableInTouchMode="false"
+            android:layout_marginBottom="25dp"
+            android:layout_above="@+id/horizontalScrollView"
+            android:layout_alignParentLeft="true"
+            android:visibility="gone"
+            android:longClickable="false"/>
+
+    <SeekBar
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekAlpha"
+            android:progress="0"
+            android:indeterminate="false"
+            android:indeterminateOnly="false"
+            android:max="255"
+            android:layout_marginBottom="27dp"
+            android:layout_above="@+id/seekColor"
+            android:layout_alignParentLeft="true"
+            android:visibility="gone"/>
+
+    <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/horizontalScrollView"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true">
+
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true">
+
+            <Button
+                    android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
-                    class="com.magic.views.BubbleView"
-                    android:id="@+id/bubbleview_bubble"
-                    android:layout_gravity="left|center_vertical"
-                    android:layout_alignBottom="@+id/bubbleview_imageview"
-                    android:visibility="gone"
-                    magic:angle="180"/>
+                    android:text="Alpha and Color"
+                    android:id="@+id/bubbleview_alpha_color_button"
+                    android:importantForAccessibility="no"/>
 
-            <HorizontalScrollView
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:id="@+id/horizontalScrollView"
-                    android:layout_below="@+id/bubbleview_imageview"
-                    android:layout_alignParentLeft="true">
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Something else"
+                    android:id="@+id/bubbleview_something_else"/>
 
-                <LinearLayout
-                        android:layout_width="fill_parent"
-                        android:layout_height="fill_parent">
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Something more later"
+                    android:id="@+id/button"/>
 
-                    <ImageView
-                            android:layout_width="75dp"
-                            android:layout_height="fill_parent"
-                            android:id="@+id/bubble_imageview_menu_1"/>
+        </LinearLayout>
+    </HorizontalScrollView>
 
-                    <ImageView
-                            android:layout_width="75dp"
-                            android:layout_height="fill_parent"
-                            android:id="@+id/bubble_imageview_menu_2"/>
-
-                    <ImageView
-                            android:layout_width="75dp"
-                            android:layout_height="fill_parent"
-                            android:id="@+id/bubble_imageview_menu_3"/>
-
-                    <ImageView
-                            android:layout_width="75dp"
-                            android:layout_height="fill_parent"
-                            android:id="@+id/bubble_imageview_menu_4"/>
-
-                    <ImageView
-                            android:layout_width="75dp"
-                            android:layout_height="fill_parent"
-                            android:id="@+id/bubble_imageview_menu_5"/>
-
-                    <ImageView
-                            android:layout_width="75dp"
-                            android:layout_height="fill_parent"
-                            android:id="@+id/bubble_imageview_menu_6"/>
-
-                </LinearLayout>
-            </HorizontalScrollView>
-        </RelativeLayout>
-
-    </LinearLayout>
 </RelativeLayout>
