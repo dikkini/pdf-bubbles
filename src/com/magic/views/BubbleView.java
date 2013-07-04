@@ -78,15 +78,6 @@ public final class BubbleView extends ImageView {
         canImageMove = false;
     }
 
-    public void setImage(Bitmap image) {
-        this.image = image;
-        postInvalidate();
-    }
-
-    public Bitmap getImage() {
-        return image;
-    }
-
     public void setText(String text) {
         if (image != null) {
             textPaint = new Paint();
@@ -270,6 +261,7 @@ public final class BubbleView extends ImageView {
         canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
     }
 
+    @Override
     public void setAlpha(int alpha) {
         drawablePaint.setAlpha(alpha);
         postInvalidate();
@@ -278,21 +270,6 @@ public final class BubbleView extends ImageView {
     public void setColorFilter(ColorFilter cf) {
         drawablePaint.setColorFilter(cf);
         postInvalidate();
-    }
-
-    public void setColor(int color) {
-/*        drawablePaint.setARGB(a, r, g, b);*/
-
-        int height = image.getHeight();
-        int width = image.getWidth();
-
-        for (int j = 0; j < height; j++) {
-            for (int i = 0; i < width; i++) {
-                image.setPixel(i, j, color);
-            }
-        }
-
-        invalidate();
     }
 
     private float spacing(MotionEvent event) {

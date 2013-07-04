@@ -7,6 +7,8 @@ import android.view.ContextMenu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -26,6 +28,9 @@ public class BubbleActivity extends Activity {
     private SeekBar seekAlpha;
     private SeekBar seekColor;
 
+    private Animation animFadeIn;
+    private Animation animBlink;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +39,9 @@ public class BubbleActivity extends Activity {
         ImageView imageView = (ImageView) findViewById(R.id.bubbleview_imageview);
         bubbleView = (BubbleView) findViewById(R.id.bubbleview_bubble);
 
+        animFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
+        animBlink = AnimationUtils.loadAnimation(this, R.anim.blinking);
+
         seekAlpha = (SeekBar) findViewById(R.id.seekAlpha);
         seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubbleView));
 
@@ -41,6 +49,14 @@ public class BubbleActivity extends Activity {
         seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(bubbleView));
 
         Button alphaColorBtn = (Button) findViewById(R.id.bubbleview_alpha_color_button);
+        Button blinkAnimBtn = (Button) findViewById(R.id.bubbleview_blink_animation_button);
+
+        blinkAnimBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bubbleView.startAnimation(animBlink);
+            }
+        });
 
         String photoPath = "/storage/sdcard0/DCIM/Camera/ContactPhoto-IMG_20130417_102638.jpg";
 
@@ -74,6 +90,7 @@ public class BubbleActivity extends Activity {
             case R.id.add_bubble:
                 bubbleView.setBubbleDrawable(R.drawable.custom_info_bubble);
                 bubbleView.setVisibility(View.VISIBLE);
+                bubbleView.startAnimation(animFadeIn);
                 break;
         }
         return true;

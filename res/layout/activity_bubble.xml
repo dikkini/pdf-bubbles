@@ -9,7 +9,7 @@
     <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="320dp"
-            android:id="@+id/relativeLayout"
+            android:id="@+id/bubbleview_relative_with_bubbles"
             android:layout_above="@+id/seekAlpha"
             android:layout_alignParentTop="true">
 
@@ -79,15 +79,15 @@
             <Button
                     android:layout_width="wrap_content"
                     android:layout_height="fill_parent"
-                    android:text="Alpha and Color"
+                    android:text="Opcaity and Color"
                     android:id="@+id/bubbleview_alpha_color_button"
                     android:importantForAccessibility="no"/>
 
             <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Something else"
-                    android:id="@+id/bubbleview_something_else"/>
+                    android:text="Blink Animation"
+                    android:id="@+id/bubbleview_blink_animation_button"/>
 
             <Button
                     android:layout_width="wrap_content"
