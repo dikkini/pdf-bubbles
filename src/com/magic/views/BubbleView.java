@@ -93,10 +93,6 @@ public final class BubbleView extends ImageView {
             Canvas canvas = new Canvas(mutableBitmap);
             canvas.drawText(text, 30, mImageHeight/2, textPaint);
             image = mutableBitmap;
-            mImagePosition.setEmpty();
-            mImagePosition.set(startX, startY, mScaledImageWidth, mScaledImageHeight);
-            mImageRegion.setEmpty();
-            mImageRegion.set(mImagePosition);
             postInvalidate();
         }
     }

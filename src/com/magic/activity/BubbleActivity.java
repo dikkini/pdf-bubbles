@@ -11,6 +11,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 
 import com.magic.BitmapUtils;
@@ -25,6 +26,9 @@ import java.io.File;
 public class BubbleActivity extends Activity {
 
     private BubbleView bubbleView;
+    private BubbleView bubbleView2;
+
+    private RelativeLayout views;
     private SeekBar seekAlpha;
     private SeekBar seekColor;
 
@@ -36,11 +40,11 @@ public class BubbleActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bubble);
 
+        views = (RelativeLayout) findViewById(R.id.bubbleview_relative_with_bubbles);
+
         ImageView imageView = (ImageView) findViewById(R.id.bubbleview_imageview);
         bubbleView = (BubbleView) findViewById(R.id.bubbleview_bubble);
-
-        animFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
-        animBlink = AnimationUtils.loadAnimation(this, R.anim.blinking);
+        bubbleView2 = (BubbleView) findViewById(R.id.bubbleview_bubble2);
 
         seekAlpha = (SeekBar) findViewById(R.id.seekAlpha);
         seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubbleView));
@@ -50,6 +54,34 @@ public class BubbleActivity extends Activity {
 
         Button alphaColorBtn = (Button) findViewById(R.id.bubbleview_alpha_color_button);
         Button blinkAnimBtn = (Button) findViewById(R.id.bubbleview_blink_animation_button);
+        Button addNewBubbleBtn = (Button) findViewById(R.id.bubbleview_addnewbubble);
+        Button choosePrevBubble = (Button) findViewById(R.id.bubbleview_choose_previous_bubble_button);
+        Button chooseNextBubble = (Button) findViewById(R.id.bubbleview_choose_next_bubble_buttn);
+
+        animFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
+        animBlink = AnimationUtils.loadAnimation(this, R.anim.blinking);
+
+        choosePrevBubble.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bubbleView.bringToFront();
+            }
+        });
+        chooseNextBubble.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bubbleView2.bringToFront();
+            }
+        });
+
+        addNewBubbleBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                bubbleView2.setBubbleDrawable(R.drawable.custom_info_bubble);
+                bubbleView2.setVisibility(View.VISIBLE);
+                bubbleView2.startAnimation(animFadeIn);
+            }
+        });
 
         blinkAnimBtn.setOnClickListener(new View.OnClickListener() {
             @Override
