@@ -3,9 +3,6 @@ package com.magic.activity;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -13,6 +10,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import com.magic.BitmapUtils;
 import com.magic.R;
@@ -25,12 +23,12 @@ import java.io.File;
  */
 public class BubbleActivity extends Activity {
 
-    private BubbleView bubbleView;
-    private BubbleView bubbleView2;
-
-    private RelativeLayout views;
+    private RelativeLayout mainRelativeLayout;
     private SeekBar seekAlpha;
     private SeekBar seekColor;
+
+    private ImageView imageView;
+    private BubbleView activeBubble;
 
     private Animation animFadeIn;
     private Animation animBlink;
@@ -40,91 +38,69 @@ public class BubbleActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bubble);
 
-        views = (RelativeLayout) findViewById(R.id.bubbleview_relative_with_bubbles);
+        mainRelativeLayout = (RelativeLayout) findViewById(R.id.bubbleview_relative_with_bubbles);
 
-        ImageView imageView = (ImageView) findViewById(R.id.bubbleview_imageview);
-        bubbleView = (BubbleView) findViewById(R.id.bubbleview_bubble);
-        bubbleView2 = (BubbleView) findViewById(R.id.bubbleview_bubble2);
-
+        imageView = (ImageView) findViewById(R.id.bubbleview_imageview);
         seekAlpha = (SeekBar) findViewById(R.id.seekAlpha);
-        seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubbleView));
-
         seekColor = (SeekBar) findViewById(R.id.seekColor);
-        seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(bubbleView));
-
-        Button alphaColorBtn = (Button) findViewById(R.id.bubbleview_alpha_color_button);
-        Button blinkAnimBtn = (Button) findViewById(R.id.bubbleview_blink_animation_button);
-        Button addNewBubbleBtn = (Button) findViewById(R.id.bubbleview_addnewbubble);
-        Button choosePrevBubble = (Button) findViewById(R.id.bubbleview_choose_previous_bubble_button);
-        Button chooseNextBubble = (Button) findViewById(R.id.bubbleview_choose_next_bubble_buttn);
 
         animFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
         animBlink = AnimationUtils.loadAnimation(this, R.anim.blinking);
 
-        choosePrevBubble.setOnClickListener(new View.OnClickListener() {
+        Button blinkAnimBtn = (Button) findViewById(R.id.bubbleview_blink_animation_button);
+        Button addNewBubbleBtn = (Button) findViewById(R.id.bubbleview_add_new_bubble_button);
+        Button nextBubble = (Button) findViewById(R.id.bubbleview_find_bubble_button);
+
+        blinkAnimBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bubbleView.bringToFront();
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble.startAnimation(animBlink);
             }
         });
-        chooseNextBubble.setOnClickListener(new View.OnClickListener() {
+
+        nextBubble.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bubbleView2.bringToFront();
+                // TODO find a way to identificate bubble for smart switch
+                BubbleView foundBubble = activeBubble = (BubbleView) mainRelativeLayout.getChildAt(1);
+                if (foundBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                foundBubble.bringToFront();
+                seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(foundBubble));
+                seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(foundBubble));
             }
         });
 
         addNewBubbleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                bubbleView2.setBubbleDrawable(R.drawable.custom_info_bubble);
-                bubbleView2.setVisibility(View.VISIBLE);
-                bubbleView2.startAnimation(animFadeIn);
-            }
-        });
+                BubbleView bubble = activeBubble = new BubbleView(BubbleActivity.this);
 
-        blinkAnimBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                bubbleView.startAnimation(animBlink);
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.getLayoutParams();
+
+                bubble.setLayoutParams(params);
+
+                mainRelativeLayout.addView(bubble);
+                bubble.setBubbleDrawable(R.drawable.custom_info_bubble);
+                bubble.setAnimation(animFadeIn);
+                seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubble));
+                seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(bubble));
             }
         });
 
         String photoPath = "/storage/sdcard0/DCIM/Camera/ContactPhoto-IMG_20130417_102638.jpg";
+        setPhoto(photoPath);
+    }
 
-        File photoFile = new File(photoPath);
+    private void setPhoto(String path) {
+        File photoFile = new File(path);
         Bitmap photo = BitmapUtils.decodeFile(photoFile, 1024, 1024, false);
         imageView.setImageBitmap(photo);
-
-        registerForContextMenu(imageView);
-
-        alphaColorBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                seekAlpha.setVisibility(View.VISIBLE);
-                seekColor.setVisibility(View.VISIBLE);
-            }
-        });
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v,
-                                    ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.bubble_actions_menu, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        int menuItem = item.getItemId();
-        switch (menuItem) {
-            case R.id.add_bubble:
-                bubbleView.setBubbleDrawable(R.drawable.custom_info_bubble);
-                bubbleView.setVisibility(View.VISIBLE);
-                bubbleView.startAnimation(animFadeIn);
-                break;
-        }
-        return true;
     }
 }

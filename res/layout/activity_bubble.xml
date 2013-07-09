@@ -21,26 +21,6 @@
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentRight="true"/>
 
-        <view
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                class="com.magic.views.BubbleView"
-                android:id="@+id/bubbleview_bubble"
-                android:layout_gravity="left|center_vertical"
-                android:layout_alignBottom="@+id/bubbleview_imageview"
-                android:visibility="gone"
-                magic:angle="180"/>
-
-        <view
-                class="com.magic.views.BubbleView"
-                magic:angle="180"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:id="@+id/bubbleview_bubble2"
-                android:layout_gravity="left|center_vertical"
-                android:layout_alignBottom="@+id/bubbleview_imageview"
-                android:visibility="gone"/>
-
     </RelativeLayout>
 
     <SeekBar
@@ -55,7 +35,6 @@
             android:layout_marginBottom="25dp"
             android:layout_above="@+id/horizontalScrollView"
             android:layout_alignParentLeft="true"
-            android:visibility="gone"
             android:longClickable="false"/>
 
     <SeekBar
@@ -69,7 +48,7 @@
             android:layout_marginBottom="27dp"
             android:layout_above="@+id/seekColor"
             android:layout_alignParentLeft="true"
-            android:visibility="gone"/>
+            />
 
     <HorizontalScrollView
             android:layout_width="wrap_content"
@@ -88,34 +67,21 @@
 
             <Button
                     android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:text="Opcaity and Color"
-                    android:id="@+id/bubbleview_alpha_color_button"
-                    android:importantForAccessibility="no"/>
-
-            <Button
-                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Blink Animation"
                     android:id="@+id/bubbleview_blink_animation_button"/>
 
             <Button
                     android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:text="Find Bubble"
+                    android:id="@+id/bubbleview_find_bubble_button"/>
+
+            <Button
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Add new bubble"
-                    android:id="@+id/bubbleview_addnewbubble"/>
-
-            <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Choose first bubble"
-                    android:id="@+id/bubbleview_choose_previous_bubble_button"/>
-
-            <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Choose first bubble"
-                    android:id="@+id/bubbleview_choose_next_bubble_buttn"/>
+                    android:id="@+id/bubbleview_add_new_bubble_button"/>
 
         </LinearLayout>
     </HorizontalScrollView>

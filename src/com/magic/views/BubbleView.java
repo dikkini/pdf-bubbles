@@ -60,11 +60,22 @@ public final class BubbleView extends ImageView {
     private BitmapFactory.Options options;
 
     public BubbleView(Context context) {
+        // TODO refactor
         super(context);
         mContext = context;
+        final ViewConfiguration configuration = ViewConfiguration.get(context);
+        mTouchSlop = configuration.getScaledTouchSlop();
+        setAdjustViewBounds(true);
+        Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        display.getWidth(); // to get width of the screen
+        display.getHeight(); // to get height of the Screen
+        mScreenHeight = display.getHeight();
+        mScreenWidth = display.getWidth();
+        canImageMove = false;
     }
 
     public BubbleView(Context context, AttributeSet attrs) {
+        // TODO refactor
         super(context, attrs);
         mContext = context;
         final ViewConfiguration configuration = ViewConfiguration.get(context);
