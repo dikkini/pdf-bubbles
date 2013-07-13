@@ -73,15 +73,15 @@
 
             <Button
                     android:layout_width="wrap_content"
-                    android:layout_height="fill_parent"
-                    android:text="Find Bubble"
-                    android:id="@+id/bubbleview_find_bubble_button"/>
+                    android:layout_height="wrap_content"
+                    android:text="Add new bubble"
+                    android:id="@+id/bubbleview_add_new_bubble_button"/>
 
             <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Add new bubble"
-                    android:id="@+id/bubbleview_add_new_bubble_button"/>
+                    android:text="SetText"
+                    android:id="@+id/bubbleview_set_text_button"/>
 
         </LinearLayout>
     </HorizontalScrollView>

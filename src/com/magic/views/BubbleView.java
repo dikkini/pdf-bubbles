@@ -2,9 +2,7 @@
 package com.magic.views;
 
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,7 +11,6 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.text.Editable;
 import android.util.AttributeSet;
 import android.util.FloatMath;
 import android.util.Log;
@@ -21,17 +18,21 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
-import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.magic.BitmapUtils;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 //TODO GLOBAL refactor
 public final class BubbleView extends ImageView {
     private Paint drawablePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private Rect drawableRect = new Rect();
     private Paint textPaint = new Paint();
-    private Bitmap sourceImage, image;
+    private Bitmap image;
     private Context mContext;
     private int mScreenHeight, mScreenWidth, prevY, prevX, mImageWidth, mImageHeight, mTouchSlop,
             mScaledImageWidth, mScaledImageHeight;
@@ -53,25 +54,50 @@ public final class BubbleView extends ImageView {
     // TODO rename
     float oldDist;
 
+    // TODO more accuracy. rename it
     float x;
     float y;
 
     private int drawableId;
     private BitmapFactory.Options options;
 
-    public BubbleView(Context context) {
+    public Integer bubbleId;
+    public List<BubbleView> bubbles;
+
+    public Integer getBubbleId() {
+        return bubbleId;
+    }
+
+    public void setBubbleId(Integer bubbleId) {
+        this.bubbleId = bubbleId;
+    }
+
+    public Rect getmImagePosition() {
+        return mImagePosition;
+    }
+
+    public List<BubbleView> getBubbles() {
+        return bubbles;
+    }
+
+    public BubbleView(Context context, ImageView imageView, Integer id, List<BubbleView> bubbles) {
         // TODO refactor
         super(context);
         mContext = context;
         final ViewConfiguration configuration = ViewConfiguration.get(context);
         mTouchSlop = configuration.getScaledTouchSlop();
         setAdjustViewBounds(true);
-        Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        display.getWidth(); // to get width of the screen
-        display.getHeight(); // to get height of the Screen
-        mScreenHeight = display.getHeight();
-        mScreenWidth = display.getWidth();
+        mScreenHeight = imageView.getHeight();
+        mScreenWidth = imageView.getWidth();
         canImageMove = false;
+
+        if (bubbles != null) {
+            this.bubbles = bubbles;
+        } else {
+            this.bubbles = new ArrayList<>();
+        }
+
+        this.bubbleId = id;
     }
 
     public BubbleView(Context context, AttributeSet attrs) {
@@ -112,7 +138,7 @@ public final class BubbleView extends ImageView {
         this.drawableId = drawableId;
         options = new BitmapFactory.Options();
         options.inScaled = false;
-        sourceImage = image = BitmapFactory.decodeResource(mContext.getResources(), this.drawableId, options);
+        image = BitmapFactory.decodeResource(mContext.getResources(), this.drawableId, options);
         mImageHeight = image.getHeight();
         mImageWidth = image.getWidth();
         mImagePosition = new Rect(startX, startY, mImageWidth, mImageHeight);
@@ -196,23 +222,7 @@ public final class BubbleView extends ImageView {
                 canImageMove = false;
                 MODE = NONE;
                 if (isOnClick) {
-                    final EditText input = new EditText(mContext);
-                    new AlertDialog.Builder(mContext)
-                            .setTitle("Update Status")
-                            .setMessage("Eneter the text!")
-                            .setView(input)
-                            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    Editable value = input.getText();
-                                    if (value != null) {
-                                        setText(value.toString());
-                                    }
-                                }
-                            }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int whichButton) {
-                            // Do nothing.
-                        }
-                    }).show();
+                    // TODO onclick
                 }
                 break;
         }
@@ -228,7 +238,13 @@ public final class BubbleView extends ImageView {
         // TODO constant
         options.inTargetDensity = 0;
 
-        this.image = BitmapFactory.decodeResource(mContext.getResources(), this.drawableId, options);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        this.image.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+        byte[] bitmapdata = bos.toByteArray();
+        ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
+
+        this.image = BitmapFactory.decodeStream(bs, null, options);
+/*        this.image = BitmapFactory.decodeResource(mContext.getResources(), this.drawableId, options);*/
         // TODO method
         if (mScaledImageWidth == 0 && mScaledImageHeight == 0) {
             mImagePosition.right = mImagePosition.left + mImageWidth;

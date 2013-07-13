@@ -3,6 +3,8 @@ package com.magic.activity;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -17,11 +19,15 @@ import com.magic.R;
 import com.magic.views.BubbleView;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by haribo on 6/17/13.
  */
 public class BubbleActivity extends Activity {
+
+    private static final String TAG = "BubbleActivity";
 
     private RelativeLayout mainRelativeLayout;
     private SeekBar seekAlpha;
@@ -32,6 +38,8 @@ public class BubbleActivity extends Activity {
 
     private Animation animFadeIn;
     private Animation animBlink;
+
+    private Integer bubbleId = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +57,6 @@ public class BubbleActivity extends Activity {
 
         Button blinkAnimBtn = (Button) findViewById(R.id.bubbleview_blink_animation_button);
         Button addNewBubbleBtn = (Button) findViewById(R.id.bubbleview_add_new_bubble_button);
-        Button nextBubble = (Button) findViewById(R.id.bubbleview_find_bubble_button);
 
         blinkAnimBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,37 +69,64 @@ public class BubbleActivity extends Activity {
             }
         });
 
-        nextBubble.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // TODO find a way to identificate bubble for smart switch
-                BubbleView foundBubble = activeBubble = (BubbleView) mainRelativeLayout.getChildAt(1);
-                if (foundBubble == null) {
-                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                foundBubble.bringToFront();
-                seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(foundBubble));
-                seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(foundBubble));
-            }
-        });
-
         addNewBubbleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BubbleView bubble = activeBubble = new BubbleView(BubbleActivity.this);
+                List<BubbleView> bubbles = new ArrayList<>();
+                if (activeBubble != null) {
+                    bubbles = activeBubble.getBubbles();
+                }
+                bubbleId = bubbleId + 1;
+                BubbleView bubble = activeBubble = new BubbleView(BubbleActivity.this, imageView,
+                        bubbleId, bubbles);
+;
+                bubbles.add(bubble);
 
-                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.getLayoutParams();
+                RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.
+                        getLayoutParams();
 
                 bubble.setLayoutParams(params);
 
-                mainRelativeLayout.addView(bubble);
+                mainRelativeLayout.addView(bubble, bubbleId);
                 bubble.setBubbleDrawable(R.drawable.custom_info_bubble);
                 bubble.setAnimation(animFadeIn);
                 seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubble));
                 seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(bubble));
+                activeBubble.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        List<BubbleView> bubbles = activeBubble.getBubbles();
+                        int x = (int) event.getX();
+                        int y = (int) event.getY();
+
+                        for (BubbleView bubble : bubbles) {
+
+                            if (activeBubble.getBubbleId().equals(bubble.getBubbleId())) {
+                                continue;
+                            }
+
+                            if (bubble.getmImagePosition().contains( x, y)) {
+                                // index of bubble which placed in x,y coordinates
+                                int focusedBubbleIndex = mainRelativeLayout.indexOfChild(bubble);
+                                BubbleView focusedBubble = (BubbleView) mainRelativeLayout
+                                        .getChildAt(focusedBubbleIndex);
+                                if (focusedBubble != null) {
+                                    Log.d(TAG, "New Bubble activated: " + focusedBubble.getBubbleId());
+                                    BubbleActivity.this.activeBubble = focusedBubble;
+                                    focusedBubble.bringToFront();
+                                    seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(focusedBubble));
+                                    seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(focusedBubble));
+                                    return false;
+                                }
+                            }
+                        }
+                        return false;
+                    }
+                });
             }
         });
+
+
 
         String photoPath = "/storage/sdcard0/DCIM/Camera/ContactPhoto-IMG_20130417_102638.jpg";
         setPhoto(photoPath);
