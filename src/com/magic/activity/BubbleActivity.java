@@ -100,7 +100,7 @@ public class BubbleActivity extends Activity {
                         int y = (int) event.getY();
 
                         for (BubbleView bubble : bubbles) {
-
+                            // TODO may be try to remove activeBubble from list?
                             if (activeBubble.getBubbleId().equals(bubble.getBubbleId())) {
                                 continue;
                             }

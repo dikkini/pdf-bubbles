@@ -37,7 +37,7 @@ public final class BubbleView extends ImageView {
     private int mScreenHeight, mScreenWidth, prevY, prevX, mImageWidth, mImageHeight, mTouchSlop,
             mScaledImageWidth, mScaledImageHeight;
     // TODO rename it
-    private int startX, startY = 10;
+    private int startXPosition, startYPosition = 10;
     private Rect mImagePosition;
     private Region mImageRegion;
     private boolean canImageMove, isOnClick;
@@ -58,7 +58,6 @@ public final class BubbleView extends ImageView {
     float x;
     float y;
 
-    private int drawableId;
     private BitmapFactory.Options options;
 
     public Integer bubbleId;
@@ -66,10 +65,6 @@ public final class BubbleView extends ImageView {
 
     public Integer getBubbleId() {
         return bubbleId;
-    }
-
-    public void setBubbleId(Integer bubbleId) {
-        this.bubbleId = bubbleId;
     }
 
     public Rect getmImagePosition() {
@@ -135,13 +130,12 @@ public final class BubbleView extends ImageView {
     }
 
     public void setBubbleDrawable(int drawableId) {
-        this.drawableId = drawableId;
         options = new BitmapFactory.Options();
         options.inScaled = false;
-        image = BitmapFactory.decodeResource(mContext.getResources(), this.drawableId, options);
+        image = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
         mImageHeight = image.getHeight();
         mImageWidth = image.getWidth();
-        mImagePosition = new Rect(startX, startY, mImageWidth, mImageHeight);
+        mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
         mImageRegion = new Region();
         mImageRegion.set(mImagePosition);
         invalidate();
@@ -232,8 +226,12 @@ public final class BubbleView extends ImageView {
     public void scaleImage() {
         // на случай если пользователь захочет уменьшить до нуля размер изображения
         if (mScaledImageHeight <= 0 || mScaledImageWidth <= 0) {
-            mScaledImageHeight = startY;
-            mScaledImageWidth = startX;
+            mScaledImageHeight = startYPosition;
+            mScaledImageWidth = startXPosition;
+        // или очень сильно увеличить
+        } else if (mScaledImageHeight > 250 || mScaledImageWidth > 400) {
+            mScaledImageHeight = 250;
+            mScaledImageWidth = 400;
         }
         // TODO constant
         options.inTargetDensity = 0;
@@ -280,6 +278,17 @@ public final class BubbleView extends ImageView {
 
         drawableRect.setEmpty();
         drawableRect.set(0, 0, image.getWidth(), image.getHeight());
+
+        //
+        drawablePaint.setColor(Color.RED);//set a color
+        drawablePaint.setStrokeWidth(5);// set your stroke width
+        // w and h are width and height of your imageview
+        // TODO  определить что и куда надо из mImagePosition для перемещения окантовки
+        canvas.drawLine(mImagePosition.left, mImagePosition.top, mScaledImageHeight, 0, drawablePaint);
+        canvas.drawLine(0, 0, 0, mScaledImageHeight, drawablePaint);
+        canvas.drawLine(mScaledImageWidth, mScaledImageHeight, mScaledImageWidth, 0, drawablePaint);
+        canvas.drawLine(mScaledImageWidth, mScaledImageHeight, 0, mScaledImageHeight, drawablePaint);
+        //
 
         canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
     }
