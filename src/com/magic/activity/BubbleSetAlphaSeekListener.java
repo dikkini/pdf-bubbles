@@ -18,7 +18,7 @@ public class BubbleSetAlphaSeekListener implements SeekBar.OnSeekBarChangeListen
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        Log.d("progressAlpha: ", "" + progress);
+        Log.d("Seek", "Alpha: " + progress);
         bubbleView.setAlpha(255-progress);
     }
 

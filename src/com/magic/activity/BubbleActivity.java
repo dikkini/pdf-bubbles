@@ -79,17 +79,20 @@ public class BubbleActivity extends Activity {
                 bubbleId = bubbleId + 1;
                 BubbleView bubble = activeBubble = new BubbleView(BubbleActivity.this, imageView,
                         bubbleId, bubbles);
-;
+
+                bubble.drawStroke();
                 bubbles.add(bubble);
+
+                showActiveBubble(bubbles, activeBubble);
 
                 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.
                         getLayoutParams();
 
                 bubble.setLayoutParams(params);
-
                 mainRelativeLayout.addView(bubble, bubbleId);
                 bubble.setBubbleDrawable(R.drawable.custom_info_bubble);
                 bubble.setAnimation(animFadeIn);
+
                 seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubble));
                 seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(bubble));
                 activeBubble.setOnTouchListener(new View.OnTouchListener() {
@@ -100,22 +103,25 @@ public class BubbleActivity extends Activity {
                         int y = (int) event.getY();
 
                         for (BubbleView bubble : bubbles) {
-                            // TODO may be try to remove activeBubble from list?
+                            // TODO may be try (how?) to remove activeBubble from list?
                             if (activeBubble.getBubbleId().equals(bubble.getBubbleId())) {
                                 continue;
                             }
 
-                            if (bubble.getmImagePosition().contains( x, y)) {
+                            if (bubble.getmImagePosition().contains(x, y)) {
                                 // index of bubble which placed in x,y coordinates
                                 int focusedBubbleIndex = mainRelativeLayout.indexOfChild(bubble);
                                 BubbleView focusedBubble = (BubbleView) mainRelativeLayout
                                         .getChildAt(focusedBubbleIndex);
                                 if (focusedBubble != null) {
                                     Log.d(TAG, "New Bubble activated: " + focusedBubble.getBubbleId());
-                                    BubbleActivity.this.activeBubble = focusedBubble;
+                                    activeBubble = focusedBubble;
                                     focusedBubble.bringToFront();
                                     seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(focusedBubble));
                                     seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(focusedBubble));
+
+                                    focusedBubble.drawStroke();
+                                    showActiveBubble(bubbles, focusedBubble);
                                     return false;
                                 }
                             }
@@ -126,8 +132,6 @@ public class BubbleActivity extends Activity {
             }
         });
 
-
-
         String photoPath = "/storage/sdcard0/DCIM/Camera/ContactPhoto-IMG_20130417_102638.jpg";
         setPhoto(photoPath);
     }
@@ -136,5 +140,14 @@ public class BubbleActivity extends Activity {
         File photoFile = new File(path);
         Bitmap photo = BitmapUtils.decodeFile(photoFile, 1024, 1024, false);
         imageView.setImageBitmap(photo);
+    }
+
+    private void showActiveBubble(List<BubbleView> bubbles, BubbleView activeBubble) {
+        for (BubbleView bubble : bubbles) {
+            if (bubble.getBubbleId().equals(activeBubble.getBubbleId())) {
+                continue;
+            }
+            bubble.removeStroke();
+        }
     }
 }

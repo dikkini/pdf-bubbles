@@ -47,21 +47,31 @@ public final class BubbleView extends ImageView {
     // TODO ??? what is treshold? why treshold?
     private final float SCROLL_TRESHOLD = 10;
 
-    public static final int NONE = 0;
-    public static final int DRAG = 1;
-    public static final int ZOOM = 2;
-    public static int MODE = NONE;
+    private static final int NONE = 0;
+    private static final int DRAG = 1;
+    private static final int ZOOM = 2;
+    private static int MODE = NONE;
     // TODO rename
     float oldDist;
 
     // TODO more accuracy. rename it
-    float x;
-    float y;
+    private float x;
+    private float y;
 
     private BitmapFactory.Options options;
 
-    public Integer bubbleId;
-    public List<BubbleView> bubbles;
+    private Integer bubbleId;
+    private List<BubbleView> bubbles;
+
+    private boolean active;
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
 
     public Integer getBubbleId() {
         return bubbleId;
@@ -231,7 +241,7 @@ public final class BubbleView extends ImageView {
         // или очень сильно увеличить
         } else if (mScaledImageHeight > 250 || mScaledImageWidth > 400) {
             mScaledImageHeight = 250;
-            mScaledImageWidth = 400;
+            mScaledImageWidth = 350;
         }
         // TODO constant
         options.inTargetDensity = 0;
@@ -279,18 +289,34 @@ public final class BubbleView extends ImageView {
         drawableRect.setEmpty();
         drawableRect.set(0, 0, image.getWidth(), image.getHeight());
 
-        //
-        drawablePaint.setColor(Color.RED);//set a color
-        drawablePaint.setStrokeWidth(5);// set your stroke width
-        // w and h are width and height of your imageview
-        // TODO  определить что и куда надо из mImagePosition для перемещения окантовки
-        canvas.drawLine(mImagePosition.left, mImagePosition.top, mScaledImageHeight, 0, drawablePaint);
-        canvas.drawLine(0, 0, 0, mScaledImageHeight, drawablePaint);
-        canvas.drawLine(mScaledImageWidth, mScaledImageHeight, mScaledImageWidth, 0, drawablePaint);
-        canvas.drawLine(mScaledImageWidth, mScaledImageHeight, 0, mScaledImageHeight, drawablePaint);
-        //
+        if (active) {
+            drawStroke(canvas);
+        }
 
         canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
+    }
+
+    public void drawStroke() {
+        active = true;
+        postInvalidate();
+    }
+
+    private void drawStroke(Canvas canvas) {
+        active = true;
+        drawablePaint.setColor(Color.RED);//set a color
+        drawablePaint.setStrokeWidth(5);// set your stroke width
+
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.top-5, drawablePaint);
+        canvas.drawLine(mImagePosition.right+5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.bottom-5, drawablePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.left-5, mImagePosition.bottom-5, drawablePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.bottom-5, mImagePosition.right+5, mImagePosition.bottom-5, drawablePaint);
+
+        postInvalidate();
+    }
+
+    public void removeStroke() {
+        active = false;
+        postInvalidate();
     }
 
     @Override
