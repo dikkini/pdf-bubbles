@@ -65,6 +65,10 @@ public final class BubbleView extends ImageView {
 
     private boolean active;
 
+    public Bitmap getImage() {
+        return image;
+    }
+
     public boolean isActive() {
         return active;
     }
@@ -231,6 +235,15 @@ public final class BubbleView extends ImageView {
                 break;
         }
         return true;
+    }
+
+    // удаляем обводку у всех баблов кроме того который в фокусе
+    public void showActiveBubble(BubbleView activeBubble) {
+        for (BubbleView bubble : bubbles) {
+            if (!bubble.getBubbleId().equals(activeBubble.getBubbleId())) {
+                bubble.removeStroke();
+            }
+        }
     }
 
     public void scaleImage() {

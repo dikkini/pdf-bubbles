@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.magic.BitmapUtils;
@@ -20,6 +21,7 @@ import com.magic.views.BubbleView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -35,6 +37,9 @@ public class BubbleActivity extends Activity {
 
     private ImageView imageView;
     private BubbleView activeBubble;
+    private TextView activeText;
+
+    private HashMap<Integer, TextView> bubblesText = new HashMap<>();
 
     private Animation animFadeIn;
     private Animation animBlink;
@@ -57,6 +62,29 @@ public class BubbleActivity extends Activity {
 
         Button blinkAnimBtn = (Button) findViewById(R.id.bubbleview_blink_animation_button);
         Button addNewBubbleBtn = (Button) findViewById(R.id.bubbleview_add_new_bubble_button);
+        Button setTextBtn = (Button) findViewById(R.id.bubbleview_set_text_button);
+
+        setTextBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeText = new TextView(BubbleActivity.this);
+                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                        activeBubble.getImage().getWidth(), activeBubble.getImage().getHeight());
+                activeText.setLayoutParams(params);
+                activeText.setX(activeBubble.getmImagePosition().left);
+                activeText.setY(activeBubble.getmImagePosition().top);
+
+                bubblesText.put(activeBubble.getBubbleId(), activeText);
+
+                activeText.setText("Привет как дела?");
+
+                mainRelativeLayout.addView(activeText);
+            }
+        });
 
         blinkAnimBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +111,7 @@ public class BubbleActivity extends Activity {
                 bubble.drawStroke();
                 bubbles.add(bubble);
 
-                showActiveBubble(bubbles, activeBubble);
+                bubble.showActiveBubble(activeBubble);
 
                 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.
                         getLayoutParams();
@@ -121,11 +149,24 @@ public class BubbleActivity extends Activity {
                                     seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(focusedBubble));
 
                                     focusedBubble.drawStroke();
-                                    showActiveBubble(bubbles, focusedBubble);
+                                    activeBubble.showActiveBubble(focusedBubble);
                                     return false;
                                 }
                             }
                         }
+                        if (bubblesText.size() > 0) {
+                            activeText = bubblesText.get(activeBubble.getBubbleId());
+                            if (activeText != null) {
+                                activeText.setX(activeBubble.getmImagePosition().left);
+                                activeText.setY(activeBubble.getmImagePosition().top);
+                                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+                                        activeBubble.getImage().getWidth(), activeBubble.getImage().getHeight());
+                                activeText.setLayoutParams(params);
+                                activeText.postInvalidate();
+                                activeText.bringToFront();
+                            }
+                        }
+
                         return false;
                     }
                 });
@@ -140,14 +181,5 @@ public class BubbleActivity extends Activity {
         File photoFile = new File(path);
         Bitmap photo = BitmapUtils.decodeFile(photoFile, 1024, 1024, false);
         imageView.setImageBitmap(photo);
-    }
-
-    private void showActiveBubble(List<BubbleView> bubbles, BubbleView activeBubble) {
-        for (BubbleView bubble : bubbles) {
-            if (bubble.getBubbleId().equals(activeBubble.getBubbleId())) {
-                continue;
-            }
-            bubble.removeStroke();
-        }
     }
 }
