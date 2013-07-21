@@ -1,14 +1,17 @@
 package com.magic.activity;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MotionEvent;
+import android.text.Editable;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.SeekBar;
@@ -23,6 +26,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by haribo on 6/17/13.
@@ -38,6 +42,7 @@ public class BubbleActivity extends Activity {
     private ImageView imageView;
     private BubbleView activeBubble;
     private TextView activeText;
+    private List<BubbleView> bubbles;
 
     private HashMap<Integer, TextView> bubblesText = new HashMap<>();
 
@@ -63,6 +68,70 @@ public class BubbleActivity extends Activity {
         Button blinkAnimBtn = (Button) findViewById(R.id.bubbleview_blink_animation_button);
         Button addNewBubbleBtn = (Button) findViewById(R.id.bubbleview_add_new_bubble_button);
         Button setTextBtn = (Button) findViewById(R.id.bubbleview_set_text_button);
+        Button draw1Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view1_button);
+        Button draw2Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view2_button);
+        Button textSizeBtn = (Button) findViewById(R.id.bubbleview_set_text_font_button);
+        Button textFontBtn = (Button) findViewById(R.id.bubbleview_set_text_size_button);
+
+        textSizeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                TextView textView = activeBubble.getTextView();
+                if (textView == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some text to bubble before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Random generator = new Random();
+                int i = generator.nextInt(15) + 1;
+                textView.setTextSize(i);
+            }
+        });
+
+        textFontBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                TextView textView = activeBubble.getTextView();
+                if (textView == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some text to bubble before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                textView.setTypeface(Typeface.DEFAULT_BOLD);
+            }
+        });
+
+        draw1Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.custom_info_bubble);
+            }
+        });
+
+        draw2Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.speech_bubble);
+            }
+        });
 
         setTextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,18 +140,24 @@ public class BubbleActivity extends Activity {
                     Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                activeText = new TextView(BubbleActivity.this);
-                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                        activeBubble.getImage().getWidth(), activeBubble.getImage().getHeight());
-                activeText.setLayoutParams(params);
-                activeText.setX(activeBubble.getmImagePosition().left);
-                activeText.setY(activeBubble.getmImagePosition().top);
-
-                bubblesText.put(activeBubble.getBubbleId(), activeText);
-
-                activeText.setText("Привет как дела?");
-
-                mainRelativeLayout.addView(activeText);
+                final EditText input = new EditText(BubbleActivity.this);
+                new AlertDialog.Builder(BubbleActivity.this)
+                        .setTitle("Some text for bubble")
+                        .setMessage("Text:")
+                        .setView(input)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                Editable value = input.getText();
+                                if (value != null) {
+                                    activeBubble = activeBubble.getActiveBubble();
+                                    activeBubble.setText(value.toString());
+                                }
+                            }
+                        }).setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // Do nothing.
+                    }
+                }).show();
             }
         });
 
@@ -93,6 +168,7 @@ public class BubbleActivity extends Activity {
                     Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                activeBubble = activeBubble.getActiveBubble();
                 activeBubble.startAnimation(animBlink);
             }
         });
@@ -100,13 +176,13 @@ public class BubbleActivity extends Activity {
         addNewBubbleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<BubbleView> bubbles = new ArrayList<>();
+                bubbles = new ArrayList<>();
                 if (activeBubble != null) {
                     bubbles = activeBubble.getBubbles();
                 }
                 bubbleId = bubbleId + 1;
                 BubbleView bubble = activeBubble = new BubbleView(BubbleActivity.this, imageView,
-                        bubbleId, bubbles);
+                        bubbleId, bubbles, mainRelativeLayout, seekColor, seekAlpha);
 
                 bubble.drawStroke();
                 bubbles.add(bubble);
@@ -118,58 +194,12 @@ public class BubbleActivity extends Activity {
 
                 bubble.setLayoutParams(params);
                 mainRelativeLayout.addView(bubble, bubbleId);
+                bubble.bringToFront();
                 bubble.setBubbleDrawable(R.drawable.custom_info_bubble);
                 bubble.setAnimation(animFadeIn);
 
                 seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubble));
                 seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(bubble));
-                activeBubble.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        List<BubbleView> bubbles = activeBubble.getBubbles();
-                        int x = (int) event.getX();
-                        int y = (int) event.getY();
-
-                        for (BubbleView bubble : bubbles) {
-                            // TODO may be try (how?) to remove activeBubble from list?
-                            if (activeBubble.getBubbleId().equals(bubble.getBubbleId())) {
-                                continue;
-                            }
-
-                            if (bubble.getmImagePosition().contains(x, y)) {
-                                // index of bubble which placed in x,y coordinates
-                                int focusedBubbleIndex = mainRelativeLayout.indexOfChild(bubble);
-                                BubbleView focusedBubble = (BubbleView) mainRelativeLayout
-                                        .getChildAt(focusedBubbleIndex);
-                                if (focusedBubble != null) {
-                                    Log.d(TAG, "New Bubble activated: " + focusedBubble.getBubbleId());
-                                    activeBubble = focusedBubble;
-                                    focusedBubble.bringToFront();
-                                    seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(focusedBubble));
-                                    seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(focusedBubble));
-
-                                    focusedBubble.drawStroke();
-                                    activeBubble.showActiveBubble(focusedBubble);
-                                    return false;
-                                }
-                            }
-                        }
-                        if (bubblesText.size() > 0) {
-                            activeText = bubblesText.get(activeBubble.getBubbleId());
-                            if (activeText != null) {
-                                activeText.setX(activeBubble.getmImagePosition().left);
-                                activeText.setY(activeBubble.getmImagePosition().top);
-                                RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-                                        activeBubble.getImage().getWidth(), activeBubble.getImage().getHeight());
-                                activeText.setLayoutParams(params);
-                                activeText.postInvalidate();
-                                activeText.bringToFront();
-                            }
-                        }
-
-                        return false;
-                    }
-                });
             }
         });
 

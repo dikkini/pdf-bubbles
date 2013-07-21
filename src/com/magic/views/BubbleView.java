@@ -11,16 +11,18 @@ import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Region;
-import android.util.AttributeSet;
+import android.text.TextUtils;
 import android.util.FloatMath;
 import android.util.Log;
-import android.view.Display;
 import android.view.MotionEvent;
 import android.view.ViewConfiguration;
-import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.SeekBar;
+import android.widget.TextView;
 
-import com.magic.BitmapUtils;
+import com.magic.activity.BubbleSetAlphaSeekListener;
+import com.magic.activity.BubbleSetColorSeekListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -29,6 +31,8 @@ import java.util.List;
 
 //TODO GLOBAL refactor
 public final class BubbleView extends ImageView {
+    private final static String TAG = "BubbleView";
+
     private Paint drawablePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private Rect drawableRect = new Rect();
     private Paint textPaint = new Paint();
@@ -62,8 +66,16 @@ public final class BubbleView extends ImageView {
 
     private Integer bubbleId;
     private List<BubbleView> bubbles;
+    private RelativeLayout container;
+    private SeekBar seekColor;
+    private SeekBar seekAlpha;
+    private TextView textView;
 
     private boolean active;
+
+    public TextView getTextView() {
+        return textView;
+    }
 
     public Bitmap getImage() {
         return image;
@@ -71,10 +83,6 @@ public final class BubbleView extends ImageView {
 
     public boolean isActive() {
         return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
     }
 
     public Integer getBubbleId() {
@@ -89,7 +97,8 @@ public final class BubbleView extends ImageView {
         return bubbles;
     }
 
-    public BubbleView(Context context, ImageView imageView, Integer id, List<BubbleView> bubbles) {
+    public BubbleView(Context context, ImageView imageView, Integer id, List<BubbleView> bubbles,
+                      RelativeLayout container, SeekBar seekColor, SeekBar seekAlpha) {
         // TODO refactor
         super(context);
         mContext = context;
@@ -106,41 +115,25 @@ public final class BubbleView extends ImageView {
             this.bubbles = new ArrayList<>();
         }
 
+        this.container = container;
         this.bubbleId = id;
-    }
-
-    public BubbleView(Context context, AttributeSet attrs) {
-        // TODO refactor
-        super(context, attrs);
-        mContext = context;
-        final ViewConfiguration configuration = ViewConfiguration.get(context);
-        mTouchSlop = configuration.getScaledTouchSlop();
-        setAdjustViewBounds(true);
-        Display display = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        display.getWidth(); // to get width of the screen
-        display.getHeight(); // to get height of the Screen
-        mScreenHeight = display.getHeight();
-        mScreenWidth = display.getWidth();
-        canImageMove = false;
+        this.seekAlpha = seekAlpha;
+        this.seekColor = seekColor;
     }
 
     public void setText(String text) {
-        if (image != null) {
-            textPaint = new Paint();
-            textPaint.setStyle(Paint.Style.FILL);
-            textPaint.setColor(Color.BLACK);
-            textPaint.setTextSize(20);
-            int lengthText = text.length();
-            mScaledImageWidth = image.getWidth() + lengthText*2;
-            mScaledImageHeight = image.getHeight() + lengthText;
-            Bitmap mutableBitmap = image.copy(Bitmap.Config.ARGB_8888, true);
-            mutableBitmap = BitmapUtils.getScaledBitmap(mutableBitmap, mScaledImageWidth,
-                    mScaledImageHeight).copy(Bitmap.Config.ARGB_8888, true);
-            Canvas canvas = new Canvas(mutableBitmap);
-            canvas.drawText(text, 30, mImageHeight/2, textPaint);
-            image = mutableBitmap;
-            postInvalidate();
+        if (textView == null) {
+            textView = new TextView(mContext);
+            textView.setText(text);
+            updateTextView();
+            container.addView(textView);
+            textView.postInvalidate();
+        } else {
+            textView.setText(text);
+            updateTextView();
+            scaleImage();
         }
+        postInvalidate();
     }
 
     public void setBubbleDrawable(int drawableId) {
@@ -152,6 +145,7 @@ public final class BubbleView extends ImageView {
         mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
         mImageRegion = new Region();
         mImageRegion.set(mImagePosition);
+        updateTextView();
         invalidate();
     }
 
@@ -199,14 +193,7 @@ public final class BubbleView extends ImageView {
                             // invalidate current position as we are moving...
                             mImagePosition.left = mImagePosition.left + deltaX;
                             mImagePosition.top = mImagePosition.top + deltaY;
-                            // TODO method
-                            if (mScaledImageWidth == 0 && mScaledImageHeight == 0) {
-                                mImagePosition.right = mImagePosition.left + mImageWidth;
-                                mImagePosition.bottom = mImagePosition.top + mImageHeight;
-                            } else {
-                                mImagePosition.right = mImagePosition.left + mScaledImageWidth;
-                                mImagePosition.bottom = mImagePosition.top + mScaledImageHeight;
-                            }
+                            changeImagePosition();
                             mImageRegion.set(mImagePosition);
                             prevX = positionX;
                             prevY = positionY;
@@ -230,11 +217,58 @@ public final class BubbleView extends ImageView {
                 canImageMove = false;
                 MODE = NONE;
                 if (isOnClick) {
-                    // TODO onclick
+                    for (BubbleView bubble : bubbles) {
+                        // TODO may be try (how?) to remove activeBubble from list?
+                        if (getBubbleId().equals(bubble.getBubbleId())) {
+                            continue;
+                        }
+
+                        if (bubble.getmImagePosition().contains((int) mDownX, (int) mDownY)) {
+                            // index of bubble which placed in x,y coordinates
+                            int focusedBubbleIndex = container.indexOfChild(bubble);
+                            BubbleView focusedBubble = (BubbleView) container
+                                    .getChildAt(focusedBubbleIndex);
+                            if (focusedBubble != null) {
+                                focusedBubble.bringToFront();
+                                seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(focusedBubble));
+                                seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(focusedBubble));
+
+                                focusedBubble.drawStroke();
+                                showActiveBubble(focusedBubble);
+                                return false;
+                            }
+                        }
+                    }
                 }
                 break;
         }
+        updateTextView();
         return true;
+    }
+
+    private void updateTextView() {
+        if (textView != null) {
+            int textW = mScaledImageWidth;
+            int textH = mScaledImageHeight;
+            if (textH == 0 && textW == 0) {
+                textW = image.getWidth();
+                textH = image.getHeight();
+            }
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textH, textW);
+            params.setMargins(getmImagePosition().left + 10, getmImagePosition().top + 10, 0, 0);
+
+            Log.d(TAG, "mScaledImageHeight" + mScaledImageHeight);
+            int test = mScaledImageHeight / 100;
+            Log.d(TAG, "TextView TEST: " + test);
+            int maxLines = 1 + test;
+            Log.d(TAG, "TextView MAX: " + maxLines);
+            textView.setMaxLines(maxLines);
+            textView.setEllipsize(TextUtils.TruncateAt.END);
+            textView.setLayoutParams(params);
+            textView.bringToFront();
+            textView.postInvalidate();
+            postInvalidate();
+        }
     }
 
     // удаляем обводку у всех баблов кроме того который в фокусе
@@ -247,14 +281,19 @@ public final class BubbleView extends ImageView {
     }
 
     public void scaleImage() {
-        // на случай если пользователь захочет уменьшить до нуля размер изображения
-        if (mScaledImageHeight <= 0 || mScaledImageWidth <= 0) {
-            mScaledImageHeight = startYPosition;
-            mScaledImageWidth = startXPosition;
+        // уменьшение изображения до размеров текста внутри бабла
+        int minScaleHeight = 10;
+        int minScaleWidth = 10;
+        int maxScaleHeigth = 250;
+        int maxScaleWidth = 300;
+
+        if (mScaledImageHeight <= minScaleHeight || mScaledImageWidth <= minScaleWidth) {
+            mScaledImageHeight = minScaleHeight;
+            mScaledImageWidth = minScaleWidth;
         // или очень сильно увеличить
-        } else if (mScaledImageHeight > 250 || mScaledImageWidth > 400) {
-            mScaledImageHeight = 250;
-            mScaledImageWidth = 350;
+        } else if (mScaledImageHeight > maxScaleHeigth || mScaledImageWidth > maxScaleWidth) {
+            mScaledImageHeight = maxScaleHeigth;
+            mScaledImageWidth = maxScaleWidth;
         }
         // TODO constant
         options.inTargetDensity = 0;
@@ -265,8 +304,14 @@ public final class BubbleView extends ImageView {
         ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
 
         this.image = BitmapFactory.decodeStream(bs, null, options);
-/*        this.image = BitmapFactory.decodeResource(mContext.getResources(), this.drawableId, options);*/
-        // TODO method
+        changeImagePosition();
+
+        mImageRegion.setEmpty();
+        mImageRegion.set(mImagePosition);
+        invalidate();
+    }
+
+    private void changeImagePosition() {
         if (mScaledImageWidth == 0 && mScaledImageHeight == 0) {
             mImagePosition.right = mImagePosition.left + mImageWidth;
             mImagePosition.bottom = mImagePosition.top + mImageHeight;
@@ -274,10 +319,6 @@ public final class BubbleView extends ImageView {
             mImagePosition.right = mImagePosition.left + mScaledImageWidth;
             mImagePosition.bottom = mImagePosition.top + mScaledImageHeight;
         }
-
-        mImageRegion.setEmpty();
-        mImageRegion.set(mImagePosition);
-        invalidate();
     }
 
     @Override
@@ -295,16 +336,18 @@ public final class BubbleView extends ImageView {
             return;
         }
 
-        drawablePaint.setAntiAlias(false);
+        drawablePaint.setAntiAlias(true);
         drawablePaint.setFilterBitmap(false);
         drawablePaint.setDither(true);
 
         drawableRect.setEmpty();
         drawableRect.set(0, 0, image.getWidth(), image.getHeight());
-
+        // рисуем рамку
+        /*
         if (active) {
             drawStroke(canvas);
         }
+        */
 
         canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
     }
@@ -314,10 +357,19 @@ public final class BubbleView extends ImageView {
         postInvalidate();
     }
 
+    public BubbleView getActiveBubble() {
+        for (BubbleView bubble : bubbles) {
+            if (bubble.isActive()) {
+                return bubble;
+            }
+        }
+        return null;
+    }
+
     private void drawStroke(Canvas canvas) {
         active = true;
-        drawablePaint.setColor(Color.RED);//set a color
-        drawablePaint.setStrokeWidth(5);// set your stroke width
+        drawablePaint.setColor(Color.BLACK); //set a color
+        drawablePaint.setStrokeWidth(3); // set your stroke width
 
         canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.top-5, drawablePaint);
         canvas.drawLine(mImagePosition.right+5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.bottom-5, drawablePaint);

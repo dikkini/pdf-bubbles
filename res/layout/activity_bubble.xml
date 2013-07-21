@@ -83,6 +83,31 @@
                     android:text="SetText"
                     android:id="@+id/bubbleview_set_text_button"/>
 
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SetText"
+                    android:id="@+id/bubbleview_set_text_font_button"/>
+
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SetText"
+                    android:id="@+id/bubbleview_set_text_size_button"/>
+
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bubble1"
+                    android:id="@+id/bubbleview_set_bubble_view1_button"/>
+
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bubble2"
+                    android:id="@+id/bubbleview_set_bubble_view2_button"
+                    android:singleLine="true"/>
+
         </LinearLayout>
     </HorizontalScrollView>
 
