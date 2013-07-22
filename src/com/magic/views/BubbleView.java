@@ -21,6 +21,7 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.magic.R;
 import com.magic.activity.BubbleSetAlphaSeekListener;
 import com.magic.activity.BubbleSetColorSeekListener;
 
@@ -65,6 +66,7 @@ public final class BubbleView extends ImageView {
     private BitmapFactory.Options options;
 
     private Integer bubbleId;
+    private Integer drawableId;
     private List<BubbleView> bubbles;
     private RelativeLayout container;
     private SeekBar seekColor;
@@ -124,27 +126,29 @@ public final class BubbleView extends ImageView {
     public void setText(String text) {
         if (textView == null) {
             textView = new TextView(mContext);
-            textView.setText(text);
-            updateTextView();
             container.addView(textView);
-            textView.postInvalidate();
-        } else {
-            textView.setText(text);
-            updateTextView();
-            scaleImage();
         }
+
+        textView.setText(text);
+        updateTextView();
+        scaleImage();
+        textView.postInvalidate();
         postInvalidate();
     }
 
     public void setBubbleDrawable(int drawableId) {
+        this.drawableId = drawableId;
         options = new BitmapFactory.Options();
         options.inScaled = false;
         image = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
         mImageHeight = image.getHeight();
         mImageWidth = image.getWidth();
-        mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
-        mImageRegion = new Region();
-        mImageRegion.set(mImagePosition);
+        if (mImagePosition == null) {
+            mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
+            mImageRegion = new Region();
+            mImageRegion.set(mImagePosition);
+            scaleImage();
+        }
         updateTextView();
         invalidate();
     }
@@ -255,12 +259,29 @@ public final class BubbleView extends ImageView {
                 textH = image.getHeight();
             }
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textH, textW);
-            params.setMargins(getmImagePosition().left + 10, getmImagePosition().top + 10, 0, 0);
+            int mathLine;
+            int maxLines;
+            switch (drawableId) {
+                case R.drawable.custom_info_bubble:
+                    params.setMargins(getmImagePosition().left + 10, getmImagePosition().top + 10, 0, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = 1 + mathLine;
+                    break;
+                case R.drawable.speech_bubble:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+                default:
+                    mathLine = 0;
+                    maxLines = 1;
+                    break;
+            }
 
             Log.d(TAG, "mScaledImageHeight" + mScaledImageHeight);
-            int test = mScaledImageHeight / 100;
-            Log.d(TAG, "TextView TEST: " + test);
-            int maxLines = 1 + test;
+
+            Log.d(TAG, "TextView TEST: " + mathLine);
+
             Log.d(TAG, "TextView MAX: " + maxLines);
             textView.setMaxLines(maxLines);
             textView.setEllipsize(TextUtils.TruncateAt.END);
@@ -282,8 +303,8 @@ public final class BubbleView extends ImageView {
 
     public void scaleImage() {
         // уменьшение изображения до размеров текста внутри бабла
-        int minScaleHeight = 10;
-        int minScaleWidth = 10;
+        int minScaleHeight = 100;
+        int minScaleWidth = 150;
         int maxScaleHeigth = 250;
         int maxScaleWidth = 300;
 
@@ -308,6 +329,7 @@ public final class BubbleView extends ImageView {
 
         mImageRegion.setEmpty();
         mImageRegion.set(mImagePosition);
+        updateTextView();
         invalidate();
     }
 
