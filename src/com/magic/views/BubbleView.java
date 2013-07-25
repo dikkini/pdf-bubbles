@@ -153,6 +153,28 @@ public final class BubbleView extends ImageView {
         invalidate();
     }
 
+    private void drawTail(Canvas canvas) {
+        float left = mImagePosition.left;
+        float right = mImagePosition.right;
+        float bottom = mImagePosition.bottom;
+        float top = mImagePosition.top;
+
+        Paint paint = new Paint();
+        paint.setColor(Color.BLACK);
+        paint.setStyle(Paint.Style.FILL);
+        paint.setStrokeWidth(5);
+
+        if (mScaledImageHeight == 0) {
+            mScaledImageHeight = mImageHeight;
+            mScaledImageWidth = mImageWidth;
+        }
+
+        int centerX = mScaledImageWidth/2;
+
+        canvas.drawLine(left, top+mScaledImageHeight, left+centerX, bottom+50, paint);
+        canvas.drawLine(right, bottom, left+centerX, bottom+50, paint);
+    }
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int positionX = (int) event.getRawX();
@@ -307,7 +329,7 @@ public final class BubbleView extends ImageView {
         int minScaleWidth = 150;
         int maxScaleHeigth = 250;
         int maxScaleWidth = 300;
-
+/*
         if (mScaledImageHeight <= minScaleHeight || mScaledImageWidth <= minScaleWidth) {
             mScaledImageHeight = minScaleHeight;
             mScaledImageWidth = minScaleWidth;
@@ -315,7 +337,7 @@ public final class BubbleView extends ImageView {
         } else if (mScaledImageHeight > maxScaleHeigth || mScaledImageWidth > maxScaleWidth) {
             mScaledImageHeight = maxScaleHeigth;
             mScaledImageWidth = maxScaleWidth;
-        }
+        }*/
         // TODO constant
         options.inTargetDensity = 0;
 
@@ -370,6 +392,7 @@ public final class BubbleView extends ImageView {
             drawStroke(canvas);
         }
         */
+        drawTail(canvas);
 
         canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
     }
