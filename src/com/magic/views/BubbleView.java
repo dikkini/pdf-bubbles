@@ -40,7 +40,7 @@ public final class BubbleView extends ImageView {
     private Bitmap image;
     private Context mContext;
     private int mScreenHeight, mScreenWidth, prevY, prevX, mImageWidth, mImageHeight, mTouchSlop,
-            mScaledImageWidth, mScaledImageHeight;
+            mScaledImageWidth, mScaledImageHeight, prevTailX, prevTailY;
     // TODO rename it
     private int startXPosition, startYPosition = 10;
     private Rect mImagePosition;
@@ -55,6 +55,7 @@ public final class BubbleView extends ImageView {
     private static final int NONE = 0;
     private static final int DRAG = 1;
     private static final int ZOOM = 2;
+    private static final int TAIL = 3;
     private static int MODE = NONE;
     // TODO rename
     float oldDist;
@@ -74,6 +75,7 @@ public final class BubbleView extends ImageView {
     private TextView textView;
 
     private boolean active;
+    private float tailLowXPoint = 0, tailLowYPoint = 0;
 
     public TextView getTextView() {
         return textView;
@@ -171,8 +173,15 @@ public final class BubbleView extends ImageView {
 
         int centerX = mScaledImageWidth/2;
 
-        canvas.drawLine(left, top+mScaledImageHeight, left+centerX, bottom+50, paint);
-        canvas.drawLine(right, bottom, left+centerX, bottom+50, paint);
+        // TODO 50 - constant
+        if ((tailLowXPoint == left+centerX || tailLowXPoint == 0) &&
+                (tailLowYPoint == bottom+50 || tailLowYPoint == 0)) {
+            tailLowXPoint = left+centerX;
+            tailLowYPoint = bottom+50;
+        }
+
+        canvas.drawLine(left+50, top+mScaledImageHeight, tailLowXPoint, tailLowYPoint, paint);
+        canvas.drawLine(right-50, bottom, tailLowXPoint, tailLowYPoint, paint);
     }
 
     @Override
@@ -190,6 +199,17 @@ public final class BubbleView extends ImageView {
                 // for listen on click tap
                 mDownX = event.getX();
                 mDownY = event.getY();
+                // tail
+                prevTailX = positionX;
+                prevTailY = positionY;
+
+                float deltaXTail = positionX - tailLowXPoint;
+                float deltaYTail = positionY - tailLowYPoint;
+
+                if ((deltaXTail < 20 && deltaXTail < 20) && (deltaXTail > -20 && deltaYTail > -20)) {
+                    Log.d(TAG, "MODE = TAIL");
+                    MODE = TAIL;
+                }
                 break;
 
             case MotionEvent.ACTION_POINTER_DOWN:
@@ -209,6 +229,17 @@ public final class BubbleView extends ImageView {
                     // scroll than a tap
                     final int distY = Math.abs(positionY - prevY);
                     final int distX = Math.abs(positionX - prevX);
+
+                    if (MODE == TAIL) {
+                        int deltaX = positionX - prevTailX;
+                        int deltaY = positionY - prevTailY;
+                        tailLowXPoint = tailLowXPoint + deltaX;
+                        tailLowYPoint = tailLowYPoint + deltaY;
+                        prevTailX = positionX;
+                        prevTailY = positionY;
+
+                        invalidate();
+                    }
 
                     if (MODE == DRAG && (distX > mTouchSlop || distY > mTouchSlop)) {
                         int deltaX = positionX - prevX;
