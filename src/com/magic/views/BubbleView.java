@@ -33,36 +33,30 @@ import java.util.List;
 //TODO GLOBAL refactor
 public final class BubbleView extends ImageView {
     private final static String TAG = "BubbleView";
+    private final static float stdDist = 10f;
+    // режимы дейстий
+    private static final int NONE = 0;
+    private static final int DRAG = 1;
+    private static final int ZOOM = 2;
+    private static final int TAIL = 3;
+
+    private static int MODE = NONE;
 
     private Paint drawablePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private Rect drawableRect = new Rect();
     private Paint textPaint = new Paint();
+
     private Bitmap image;
     private Context mContext;
     private int mScreenHeight, mScreenWidth, prevY, prevX, mImageWidth, mImageHeight, mTouchSlop,
             mScaledImageWidth, mScaledImageHeight, prevTailX, prevTailY;
-    // TODO rename it
-    private int startXPosition, startYPosition = 10;
     private Rect mImagePosition;
     private Region mImageRegion;
     private boolean canImageMove, isOnClick;
     private float mDownX;
     private float mDownY;
 
-    // TODO ??? what is treshold? why treshold?
-    private final float SCROLL_TRESHOLD = 10;
-
-    private static final int NONE = 0;
-    private static final int DRAG = 1;
-    private static final int ZOOM = 2;
-    private static final int TAIL = 3;
-    private static int MODE = NONE;
-    // TODO rename
-    float oldDist;
-
-    // TODO more accuracy. rename it
-    private float x;
-    private float y;
+    private float movingDist;
 
     private BitmapFactory.Options options;
 
@@ -79,10 +73,6 @@ public final class BubbleView extends ImageView {
 
     public TextView getTextView() {
         return textView;
-    }
-
-    public Bitmap getImage() {
-        return image;
     }
 
     public boolean isActive() {
@@ -146,6 +136,9 @@ public final class BubbleView extends ImageView {
         mImageHeight = image.getHeight();
         mImageWidth = image.getWidth();
         if (mImagePosition == null) {
+            // начальные координаты изображения
+            int startYPosition = 10;
+            int startXPosition = 10;
             mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
             mImageRegion = new Region();
             mImageRegion.set(mImagePosition);
@@ -199,29 +192,28 @@ public final class BubbleView extends ImageView {
                 // for listen on click tap
                 mDownX = event.getX();
                 mDownY = event.getY();
-                // tail
+                // tail coordinates
                 prevTailX = positionX;
                 prevTailY = positionY;
 
                 float deltaXTail = positionX - tailLowXPoint;
                 float deltaYTail = positionY - tailLowYPoint;
 
+                // 20 20 -20 -20 - квадрат который означает что пользователь начала передвигать хвостик
                 if ((deltaXTail < 20 && deltaXTail < 20) && (deltaXTail > -20 && deltaYTail > -20)) {
-                    Log.d(TAG, "MODE = TAIL");
                     MODE = TAIL;
                 }
                 break;
 
             case MotionEvent.ACTION_POINTER_DOWN:
-                oldDist = spacing(event);
-
-                // TODO constant
-                if (oldDist > 10f) {
+                movingDist = spacing(event);
+                if (movingDist > stdDist) {
                     MODE = ZOOM;
                 }
                 break;
 
             case MotionEvent.ACTION_MOVE:
+                float SCROLL_TRESHOLD = 10;
                 if (canImageMove && (Math.abs(mDownX - event.getX()) > SCROLL_TRESHOLD
                     || Math.abs(mDownY - event.getY()) > SCROLL_TRESHOLD)) {
                     isOnClick = false;
@@ -258,11 +250,10 @@ public final class BubbleView extends ImageView {
                             invalidate();
                         }
                     } else if (MODE == ZOOM) {
-                        float newDist2 = spacing(event);
-                        // TODO constant
-                        if (newDist2 > 10f) {
-                            mScaledImageHeight = (int) (newDist2 / oldDist * mImageHeight);
-                            mScaledImageWidth = (int) (newDist2 / oldDist * mImageWidth);
+                        float newMovingDist = spacing(event);
+                        if (newMovingDist > stdDist) {
+                            mScaledImageHeight = (int) (newMovingDist / movingDist * mImageHeight);
+                            mScaledImageWidth = (int) (newMovingDist / movingDist * mImageWidth);
 
                             scaleImage();
                         }
@@ -275,7 +266,6 @@ public final class BubbleView extends ImageView {
                 MODE = NONE;
                 if (isOnClick) {
                     for (BubbleView bubble : bubbles) {
-                        // TODO may be try (how?) to remove activeBubble from list?
                         if (getBubbleId().equals(bubble.getBubbleId())) {
                             continue;
                         }
@@ -326,16 +316,10 @@ public final class BubbleView extends ImageView {
                     maxLines = mathLine;
                     break;
                 default:
-                    mathLine = 0;
                     maxLines = 1;
                     break;
             }
 
-            Log.d(TAG, "mScaledImageHeight" + mScaledImageHeight);
-
-            Log.d(TAG, "TextView TEST: " + mathLine);
-
-            Log.d(TAG, "TextView MAX: " + maxLines);
             textView.setMaxLines(maxLines);
             textView.setEllipsize(TextUtils.TruncateAt.END);
             textView.setLayoutParams(params);
@@ -355,12 +339,12 @@ public final class BubbleView extends ImageView {
     }
 
     public void scaleImage() {
-        // уменьшение изображения до размеров текста внутри бабла
+        // TODO продумать логику максимального и минимального размера бабла
+/*        // уменьшение изображения до размеров текста внутри бабла
         int minScaleHeight = 100;
         int minScaleWidth = 150;
         int maxScaleHeigth = 250;
-        int maxScaleWidth = 300;
-/*
+        int maxScaleWidth = 400;
         if (mScaledImageHeight <= minScaleHeight || mScaledImageWidth <= minScaleWidth) {
             mScaledImageHeight = minScaleHeight;
             mScaledImageWidth = minScaleWidth;
@@ -369,7 +353,7 @@ public final class BubbleView extends ImageView {
             mScaledImageHeight = maxScaleHeigth;
             mScaledImageWidth = maxScaleWidth;
         }*/
-        // TODO constant
+
         options.inTargetDensity = 0;
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -472,6 +456,8 @@ public final class BubbleView extends ImageView {
     }
 
     private float spacing(MotionEvent event) {
+        float x = 0;
+        float y = 0;
         try {
             x = event.getX(0) - event.getX(1);
             y = event.getY(0) - event.getY(1);
