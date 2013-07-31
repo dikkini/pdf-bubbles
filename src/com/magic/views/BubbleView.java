@@ -173,8 +173,57 @@ public final class BubbleView extends ImageView {
             tailLowYPoint = bottom+50;
         }
 
-        canvas.drawLine(left+50, top+mScaledImageHeight, tailLowXPoint, tailLowYPoint, paint);
-        canvas.drawLine(right-50, bottom, tailLowXPoint, tailLowYPoint, paint);
+//        Log.d(TAG, "bottom: " + bottom);
+//        Log.d(TAG, "top: " + top);
+//        Log.d(TAG, "right: " + right);
+//        Log.d(TAG, "left: " + left);
+//        Log.d(TAG, "left + centerX: " + left+centerX);
+//        Log.d(TAG, "tailLowXPoint: " + tailLowXPoint);
+//        Log.d(TAG, "tailLowYPoint: " + tailLowYPoint);
+
+        float startX1 = left+50;
+        float startY1 = bottom-5;
+        float startX2 = right-50;
+        float startY2 = bottom-5;
+
+        // down side
+        if (tailLowXPoint < right && tailLowYPoint > bottom+40) {
+            startX1 = left+50;
+            startY1 = bottom-5;
+            startX2 = right-50;
+            startY2 = bottom-5;
+            Log.d(TAG, "IT IS DOWN SIDE: tailLowXPoint < right && tailLowYPoint > bottom+40");
+        }
+
+        // left side
+        if (tailLowYPoint < bottom+40 &&  tailLowXPoint < left && tailLowXPoint < right) {
+            startX1 = left;
+            startY1 = top+30;
+            startX2 = left;
+            startY2 = bottom-30;
+            Log.d(TAG, "IT IS LEFT SIDE: tailLowYPoint < bottom+40 &&  tailLowXPoint < left && tailLowXPoint < right");
+        }
+
+        // up sidde
+        if (tailLowXPoint < right && tailLowYPoint < bottom+40 &&  tailLowXPoint > left) {
+            startX1 = left+50;
+            startY1 = top+10;
+            startX2 = right-50;
+            startY2 = top+10;
+            Log.d(TAG, "IT IS UP SIDE: tailLowXPoint < right && tailLowYPoint < bottom+40 &&  tailLowXPoint > left");
+        }
+
+        // right side
+        if (tailLowXPoint > right && tailLowYPoint > top-70 && tailLowXPoint > bottom) {
+            startX1 = right;
+            startY1 = top+30;
+            startX2 = right;
+            startY2 = bottom-30;
+            Log.d(TAG, "IT IS RIGHT SIDE: tailLowXPoint > right && tailLowYPoint > top-70 && tailLowXPoint > bottom");
+        }
+
+        canvas.drawLine(startX1, startY1, tailLowXPoint, tailLowYPoint, paint);
+        canvas.drawLine(startX2, startY2, tailLowXPoint, tailLowYPoint, paint);
     }
 
     @Override
