@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.text.TextUtils;
@@ -45,6 +46,7 @@ public final class BubbleView extends ImageView {
     private Paint drawablePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private Rect drawableRect = new Rect();
     private Paint textPaint = new Paint();
+    private Paint tailPaint = new Paint();
 
     private Bitmap image;
     private Context mContext;
@@ -154,10 +156,8 @@ public final class BubbleView extends ImageView {
         float bottom = mImagePosition.bottom;
         float top = mImagePosition.top;
 
-        Paint paint = new Paint();
-        paint.setColor(Color.BLACK);
-        paint.setStyle(Paint.Style.FILL);
-        paint.setStrokeWidth(5);
+        tailPaint.setStyle(Paint.Style.FILL);
+        tailPaint.setStrokeWidth(5);
 
         if (mScaledImageHeight == 0) {
             mScaledImageHeight = mImageHeight;
@@ -222,8 +222,15 @@ public final class BubbleView extends ImageView {
             Log.d(TAG, "IT IS RIGHT SIDE: tailLowXPoint > right && tailLowYPoint > top-70 && tailLowXPoint > bottom");
         }
 
-        canvas.drawLine(startX1, startY1, tailLowXPoint, tailLowYPoint, paint);
-        canvas.drawLine(startX2, startY2, tailLowXPoint, tailLowYPoint, paint);
+        Path fillPath = new Path();
+        fillPath.moveTo(startX1, startY1);
+        fillPath.lineTo(tailLowXPoint, tailLowYPoint);
+        fillPath.lineTo(startX2, startY2);
+
+        canvas.drawPath(fillPath, tailPaint);
+
+//        canvas.drawLine(startX1, startY1, tailLowXPoint, tailLowYPoint, paint);
+//        canvas.drawLine(startX2, startY2, tailLowXPoint, tailLowYPoint, paint);
     }
 
     @Override
@@ -496,11 +503,17 @@ public final class BubbleView extends ImageView {
     @Override
     public void setAlpha(int alpha) {
         drawablePaint.setAlpha(alpha);
+        tailPaint.setAlpha(alpha);
         postInvalidate();
     }
 
     public void setColorFilter(ColorFilter cf) {
         drawablePaint.setColorFilter(cf);
+        postInvalidate();
+    }
+
+    public void setTailColor(int color) {
+        tailPaint.setColor(color);
         postInvalidate();
     }
 

@@ -62,6 +62,9 @@ public class BubbleActivity extends Activity {
         seekAlpha = (SeekBar) findViewById(R.id.seekAlpha);
         seekColor = (SeekBar) findViewById(R.id.seekColor);
 
+        seekColor.setProgress(1);
+        seekColor.setMax(BubbleSetColorSeekListener.max);
+
         animFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
         animBlink = AnimationUtils.loadAnimation(this, R.anim.blinking);
 

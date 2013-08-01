@@ -13,9 +13,11 @@ public class BubbleSetColorSeekListener implements SeekBar.OnSeekBarChangeListen
 
     private BubbleView bubbleView;
 
-    private final int[] mColors =
+    private static final int[] mColors =
             {Color.BLUE, Color.GREEN, Color.RED, Color.LTGRAY, Color.MAGENTA, Color.CYAN,
-                    Color.YELLOW, Color.WHITE, Color.BLACK, Color.DKGRAY, Color.GRAY, Color.TRANSPARENT};
+                    Color.YELLOW, Color.WHITE, Color.BLACK, Color.DKGRAY, Color.GRAY};
+
+    public static int max = mColors.length-1;
 
     public BubbleSetColorSeekListener(BubbleView bubble) {
         this.bubbleView = bubble;
@@ -24,7 +26,8 @@ public class BubbleSetColorSeekListener implements SeekBar.OnSeekBarChangeListen
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         int mColor = (int) Math.floor(Math.random() * mColors.length);
-        bubbleView.setColorFilter(mColors[mColor], PorterDuff.Mode.MULTIPLY);
+        bubbleView.setColorFilter(mColors[progress], PorterDuff.Mode.MULTIPLY);
+        bubbleView.setTailColor(mColors[progress]);
     }
 
     @Override
