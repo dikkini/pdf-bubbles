@@ -31,7 +31,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO GLOBAL refactor
+// TODO GLOBAL refactor
+// TODO refactor draw/remove Strokes methods
 public final class BubbleView extends ImageView {
     private final static String TAG = "BubbleView";
     private final static float stdDist = 10f;
@@ -72,6 +73,7 @@ public final class BubbleView extends ImageView {
 
     private boolean active;
     private float tailLowXPoint = 0, tailLowYPoint = 0;
+    private boolean drawCircleTail = true;
 
     public TextView getTextView() {
         return textView;
@@ -173,14 +175,6 @@ public final class BubbleView extends ImageView {
             tailLowYPoint = bottom+50;
         }
 
-//        Log.d(TAG, "bottom: " + bottom);
-//        Log.d(TAG, "top: " + top);
-//        Log.d(TAG, "right: " + right);
-//        Log.d(TAG, "left: " + left);
-//        Log.d(TAG, "left + centerX: " + left+centerX);
-//        Log.d(TAG, "tailLowXPoint: " + tailLowXPoint);
-//        Log.d(TAG, "tailLowYPoint: " + tailLowYPoint);
-
         float startX1 = left+50;
         float startY1 = bottom-5;
         float startX2 = right-50;
@@ -205,7 +199,7 @@ public final class BubbleView extends ImageView {
         }
 
         // up sidde
-        if (tailLowXPoint < right && tailLowYPoint < bottom+40 &&  tailLowXPoint > left) {
+        if (tailLowXPoint < right && tailLowYPoint < bottom+40 && tailLowXPoint > left) {
             startX1 = left+50;
             startY1 = top+10;
             startX2 = right-50;
@@ -228,6 +222,10 @@ public final class BubbleView extends ImageView {
         fillPath.lineTo(startX2, startY2);
 
         canvas.drawPath(fillPath, tailPaint);
+
+        if (drawCircleTail) {
+            canvas.drawCircle(tailLowXPoint, tailLowYPoint, 10, tailPaint);
+        }
 
 //        canvas.drawLine(startX1, startY1, tailLowXPoint, tailLowYPoint, paint);
 //        canvas.drawLine(startX2, startY2, tailLowXPoint, tailLowYPoint, paint);
@@ -457,12 +455,10 @@ public final class BubbleView extends ImageView {
 
         drawableRect.setEmpty();
         drawableRect.set(0, 0, image.getWidth(), image.getHeight());
-        // рисуем рамку
-        /*
+        // рисуем рамку и пипку для управления хвостиком
         if (active) {
             drawStroke(canvas);
         }
-        */
         drawTail(canvas);
 
         canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
@@ -470,6 +466,7 @@ public final class BubbleView extends ImageView {
 
     public void drawStroke() {
         active = true;
+        drawCircleTail = true;
         postInvalidate();
     }
 
@@ -484,19 +481,23 @@ public final class BubbleView extends ImageView {
 
     private void drawStroke(Canvas canvas) {
         active = true;
-        drawablePaint.setColor(Color.BLACK); //set a color
-        drawablePaint.setStrokeWidth(3); // set your stroke width
+        drawCircleTail = true;
+        // раскомментировать если нужна будет рамка
+/*        Paint strokePaint = new Paint();
+        strokePaint.setColor(Color.BLACK); //set a color
+        strokePaint.setStrokeWidth(3); // set your stroke width
 
-        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.top-5, drawablePaint);
-        canvas.drawLine(mImagePosition.right+5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.bottom-5, drawablePaint);
-        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.left-5, mImagePosition.bottom-5, drawablePaint);
-        canvas.drawLine(mImagePosition.left-5, mImagePosition.bottom-5, mImagePosition.right+5, mImagePosition.bottom-5, drawablePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.top-5, strokePaint);
+        canvas.drawLine(mImagePosition.right+5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.left-5, mImagePosition.bottom-5, strokePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.bottom-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);*/
 
         postInvalidate();
     }
 
     public void removeStroke() {
         active = false;
+        drawCircleTail = false;
         postInvalidate();
     }
 
