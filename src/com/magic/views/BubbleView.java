@@ -119,6 +119,150 @@ public final class BubbleView extends ImageView {
         this.seekColor = seekColor;
     }
 
+    @Override
+    public void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        // если изображение не установлено
+        if (image == null) {
+            drawablePaint.setStyle(Paint.Style.FILL);
+            drawablePaint.setColor(Color.WHITE);
+            if (mImagePosition == null) {
+                canvas.drawRect(10F, 10F, 10F, 10F, drawablePaint);
+                return;
+            }
+            canvas.drawRect(mImagePosition, textPaint);
+            return;
+        }
+
+        drawablePaint.setAntiAlias(true);
+        drawablePaint.setFilterBitmap(false);
+        drawablePaint.setDither(true);
+
+        drawableRect.setEmpty();
+        drawableRect.set(0, 0, image.getWidth(), image.getHeight());
+        // рисуем рамку и пипку для управления хвостиком
+        if (active) {
+            drawStroke(canvas);
+        }
+        drawTail(canvas);
+
+        canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int positionX = (int) event.getRawX();
+        int positionY = (int) event.getRawY();
+
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN:
+                MODE = DRAG;
+                isOnClick = true;
+                canImageMove = true;
+                prevX = positionX;
+                prevY = positionY;
+                // for listen on click tap
+                mDownX = event.getX();
+                mDownY = event.getY();
+                // tail coordinates
+                prevTailX = positionX;
+                prevTailY = positionY;
+
+                float deltaXTail = positionX - tailLowXPoint;
+                float deltaYTail = positionY - tailLowYPoint;
+
+                // 20 20 -20 -20 - квадрат который означает что пользователь начала передвигать хвостик
+                if ((deltaXTail < 20 && deltaXTail < 20) && (deltaXTail > -20 && deltaYTail > -20)) {
+                    MODE = TAIL;
+                }
+                break;
+
+            case MotionEvent.ACTION_POINTER_DOWN:
+                movingDist = spacing(event);
+                if (movingDist > stdDist) {
+                    MODE = ZOOM;
+                }
+                break;
+
+            case MotionEvent.ACTION_MOVE:
+                float SCROLL_THRESHOLD = 10;
+                if (canImageMove && (Math.abs(mDownX - event.getX()) > SCROLL_THRESHOLD
+                        || Math.abs(mDownY - event.getY()) > SCROLL_THRESHOLD)) {
+                    isOnClick = false;
+                    // Check if we have moved far enough that it looks more like a
+                    // scroll than a tap
+                    final int distY = Math.abs(positionY - prevY);
+                    final int distX = Math.abs(positionX - prevX);
+
+                    if (MODE == DRAG && (distX > mTouchSlop || distY > mTouchSlop)) {
+                        int deltaX = positionX - prevX;
+                        int deltaY = positionY - prevY;
+                        // Check if delta is added, is the rectangle is within the visible screen
+                        if ((mImagePosition.left + deltaX) > 0 && ((mImagePosition.right + deltaX) < mScreenWidth) &&
+                                (mImagePosition.top + deltaY) > 0 && ((mImagePosition.bottom + deltaY) < mScreenHeight)) {
+                            // invalidate current position as we are moving...
+                            mImagePosition.left = mImagePosition.left + deltaX;
+                            mImagePosition.top = mImagePosition.top + deltaY;
+                            changeImagePosition();
+                            mImageRegion.set(mImagePosition);
+                            prevX = positionX;
+                            prevY = positionY;
+
+                            invalidate();
+                        }
+                    } else if (MODE == ZOOM) {
+                        float newMovingDist = spacing(event);
+                        if (newMovingDist > stdDist) {
+                            mScaledImageHeight = (int) (newMovingDist / movingDist * mImageHeight);
+                            mScaledImageWidth = (int) (newMovingDist / movingDist * mImageWidth);
+
+                            scaleImage();
+                        }
+                    } else if (MODE == TAIL) {
+                        int deltaX = positionX - prevTailX;
+                        int deltaY = positionY - prevTailY;
+                        tailLowXPoint = tailLowXPoint + deltaX;
+                        tailLowYPoint = tailLowYPoint + deltaY;
+                        prevTailX = positionX;
+                        prevTailY = positionY;
+
+                        invalidate();
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                canImageMove = false;
+                MODE = NONE;
+                if (isOnClick) {
+                    for (BubbleView bubble : bubbles) {
+                        if (getBubbleId().equals(bubble.getBubbleId())) {
+                            continue;
+                        }
+
+                        if (bubble.getmImagePosition().contains((int) mDownX, (int) mDownY)) {
+                            // index of bubble which placed in x,y coordinates
+                            int focusedBubbleIndex = container.indexOfChild(bubble);
+                            BubbleView focusedBubble = (BubbleView) container
+                                    .getChildAt(focusedBubbleIndex);
+                            if (focusedBubble != null) {
+                                focusedBubble.bringToFront();
+                                seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(focusedBubble));
+                                seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(focusedBubble));
+
+                                focusedBubble.drawStroke();
+                                showActiveBubble(focusedBubble);
+                                return false;
+                            }
+                        }
+                    }
+                }
+                break;
+        }
+        updateTextView();
+        return true;
+    }
+
     public void setText(String text) {
         if (textView == null) {
             textView = new TextView(mContext);
@@ -242,122 +386,6 @@ public final class BubbleView extends ImageView {
 //        canvas.drawLine(startX2, startY2, tailLowXPoint, tailLowYPoint, paint);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        int positionX = (int) event.getRawX();
-        int positionY = (int) event.getRawY();
-
-        switch (event.getAction() & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN:
-                MODE = DRAG;
-                isOnClick = true;
-                canImageMove = true;
-                prevX = positionX;
-                prevY = positionY;
-                // for listen on click tap
-                mDownX = event.getX();
-                mDownY = event.getY();
-                // tail coordinates
-                prevTailX = positionX;
-                prevTailY = positionY;
-
-                float deltaXTail = positionX - tailLowXPoint;
-                float deltaYTail = positionY - tailLowYPoint;
-
-                // 20 20 -20 -20 - квадрат который означает что пользователь начала передвигать хвостик
-                if ((deltaXTail < 20 && deltaXTail < 20) && (deltaXTail > -20 && deltaYTail > -20)) {
-                    MODE = TAIL;
-                }
-                break;
-
-            case MotionEvent.ACTION_POINTER_DOWN:
-                movingDist = spacing(event);
-                if (movingDist > stdDist) {
-                    MODE = ZOOM;
-                }
-                break;
-
-            case MotionEvent.ACTION_MOVE:
-                float SCROLL_TRESHOLD = 10;
-                if (canImageMove && (Math.abs(mDownX - event.getX()) > SCROLL_TRESHOLD
-                    || Math.abs(mDownY - event.getY()) > SCROLL_TRESHOLD)) {
-                    isOnClick = false;
-                    // Check if we have moved far enough that it looks more like a
-                    // scroll than a tap
-                    final int distY = Math.abs(positionY - prevY);
-                    final int distX = Math.abs(positionX - prevX);
-
-                    if (MODE == TAIL) {
-                        int deltaX = positionX - prevTailX;
-                        int deltaY = positionY - prevTailY;
-                        tailLowXPoint = tailLowXPoint + deltaX;
-                        tailLowYPoint = tailLowYPoint + deltaY;
-                        prevTailX = positionX;
-                        prevTailY = positionY;
-
-                        invalidate();
-                    }
-
-                    if (MODE == DRAG && (distX > mTouchSlop || distY > mTouchSlop)) {
-                        int deltaX = positionX - prevX;
-                        int deltaY = positionY - prevY;
-                        // Check if delta is added, is the rectangle is within the visible screen
-                        if ((mImagePosition.left + deltaX) > 0 && ((mImagePosition.right + deltaX) < mScreenWidth) &&
-                                (mImagePosition.top + deltaY) > 0 && ((mImagePosition.bottom + deltaY) < mScreenHeight)) {
-                            // invalidate current position as we are moving...
-                            mImagePosition.left = mImagePosition.left + deltaX;
-                            mImagePosition.top = mImagePosition.top + deltaY;
-                            changeImagePosition();
-                            mImageRegion.set(mImagePosition);
-                            prevX = positionX;
-                            prevY = positionY;
-
-                            invalidate();
-                        }
-                    } else if (MODE == ZOOM) {
-                        float newMovingDist = spacing(event);
-                        if (newMovingDist > stdDist) {
-                            mScaledImageHeight = (int) (newMovingDist / movingDist * mImageHeight);
-                            mScaledImageWidth = (int) (newMovingDist / movingDist * mImageWidth);
-
-                            scaleImage();
-                        }
-                    }
-                }
-                break;
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-                canImageMove = false;
-                MODE = NONE;
-                if (isOnClick) {
-                    for (BubbleView bubble : bubbles) {
-                        if (getBubbleId().equals(bubble.getBubbleId())) {
-                            continue;
-                        }
-
-                        if (bubble.getmImagePosition().contains((int) mDownX, (int) mDownY)) {
-                            // index of bubble which placed in x,y coordinates
-                            int focusedBubbleIndex = container.indexOfChild(bubble);
-                            BubbleView focusedBubble = (BubbleView) container
-                                    .getChildAt(focusedBubbleIndex);
-                            if (focusedBubble != null) {
-                                focusedBubble.bringToFront();
-                                seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(focusedBubble));
-                                seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(focusedBubble));
-
-                                focusedBubble.drawStroke();
-                                showActiveBubble(focusedBubble);
-                                return false;
-                            }
-                        }
-                    }
-                }
-                break;
-        }
-        updateTextView();
-        return true;
-    }
-
     private void updateTextView() {
         if (textView != null) {
             int textW = mScaledImageWidth;
@@ -445,34 +473,18 @@ public final class BubbleView extends ImageView {
         }
     }
 
-    @Override
-    public void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        // если изображение не установлено
-        if (image == null) {
-            drawablePaint.setStyle(Paint.Style.FILL);
-            drawablePaint.setColor(Color.WHITE);
-            if (mImagePosition == null) {
-                canvas.drawRect(10F, 10F, 10F, 10F, drawablePaint);
-                return;
-            }
-            canvas.drawRect(mImagePosition, textPaint);
-            return;
-        }
+    private void drawStroke(Canvas canvas) {
+        active = true;
+        drawCircleTail = true;
+        // раскомментировать если нужна будет рамка
+/*        Paint strokePaint = new Paint();
+        strokePaint.setColor(Color.BLACK); //set a color
+        strokePaint.setStrokeWidth(3); // set your stroke width
 
-        drawablePaint.setAntiAlias(true);
-        drawablePaint.setFilterBitmap(false);
-        drawablePaint.setDither(true);
-
-        drawableRect.setEmpty();
-        drawableRect.set(0, 0, image.getWidth(), image.getHeight());
-        // рисуем рамку и пипку для управления хвостиком
-        if (active) {
-            drawStroke(canvas);
-        }
-        drawTail(canvas);
-
-        canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.top-5, strokePaint);
+        canvas.drawLine(mImagePosition.right+5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.left-5, mImagePosition.bottom-5, strokePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.bottom-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);*/
     }
 
     public void drawStroke() {
@@ -488,20 +500,6 @@ public final class BubbleView extends ImageView {
             }
         }
         return null;
-    }
-
-    private void drawStroke(Canvas canvas) {
-        active = true;
-        drawCircleTail = true;
-        // раскомментировать если нужна будет рамка
-/*        Paint strokePaint = new Paint();
-        strokePaint.setColor(Color.BLACK); //set a color
-        strokePaint.setStrokeWidth(3); // set your stroke width
-
-        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.top-5, strokePaint);
-        canvas.drawLine(mImagePosition.right+5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);
-        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.left-5, mImagePosition.bottom-5, strokePaint);
-        canvas.drawLine(mImagePosition.left-5, mImagePosition.bottom-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);*/
     }
 
     public void removeStroke() {
