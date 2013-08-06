@@ -156,8 +156,6 @@ public final class BubbleView extends ImageView {
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
-                MODE = DRAG;
-                isOnClick = true;
                 canImageMove = true;
                 prevX = positionX;
                 prevY = positionY;
@@ -172,11 +170,16 @@ public final class BubbleView extends ImageView {
                 float deltaYTail = positionY - tailLowYPoint;
 
                 // 20 20 -20 -20 - квадрат который означает что пользователь начала передвигать хвостик
-                if ((deltaXTail < 20 && deltaXTail < 20) && (deltaXTail > -20 && deltaYTail > -20)) {
+                if ((deltaXTail < 20 && deltaXTail < 20) && (deltaXTail > - 20 && deltaYTail > - 20)) {
                     MODE = TAIL;
+                    break;
+                } else if (mImagePosition != null && mImagePosition.contains((int) mDownX, (int) mDownY)) {
+                    MODE = DRAG;
+                    break;
+                } else {
+                    isOnClick = true;
+                    break;
                 }
-                break;
-
             case MotionEvent.ACTION_POINTER_DOWN:
                 movingDist = spacing(event);
                 if (movingDist > stdDist) {
