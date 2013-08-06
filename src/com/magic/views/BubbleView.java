@@ -180,6 +180,17 @@ public final class BubbleView extends ImageView {
         float startX2 = right-50;
         float startY2 = bottom-5;
 
+        Log.d(TAG, "------------------------------------------------------------------------------");
+
+        Log.d(TAG, "left: " + left);
+        Log.d(TAG, "right: " + right);
+        Log.d(TAG, "top: " + top);
+        Log.d(TAG, "bottom: " + bottom);
+        Log.d(TAG, "tailLowXPoint: " + tailLowXPoint);
+        Log.d(TAG, "tailLowYPoint: " + tailLowYPoint);
+
+        Log.d(TAG, "------------------------------------------------------------------------------");
+
         // down side
         if (tailLowXPoint < right && tailLowYPoint > bottom+40) {
             startX1 = left+50;
@@ -208,7 +219,7 @@ public final class BubbleView extends ImageView {
         }
 
         // right side
-        if (tailLowXPoint > right && tailLowYPoint > top-70 && tailLowXPoint > bottom) {
+        if (tailLowXPoint > right && tailLowYPoint < bottom) {
             startX1 = right;
             startY1 = top+30;
             startX2 = right;
@@ -226,7 +237,7 @@ public final class BubbleView extends ImageView {
         if (drawCircleTail) {
             canvas.drawCircle(tailLowXPoint, tailLowYPoint, 10, tailPaint);
         }
-
+        // хвост как пряммые линии
 //        canvas.drawLine(startX1, startY1, tailLowXPoint, tailLowYPoint, paint);
 //        canvas.drawLine(startX2, startY2, tailLowXPoint, tailLowYPoint, paint);
     }
@@ -491,8 +502,6 @@ public final class BubbleView extends ImageView {
         canvas.drawLine(mImagePosition.right+5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);
         canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.left-5, mImagePosition.bottom-5, strokePaint);
         canvas.drawLine(mImagePosition.left-5, mImagePosition.bottom-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);*/
-
-        postInvalidate();
     }
 
     public void removeStroke() {
