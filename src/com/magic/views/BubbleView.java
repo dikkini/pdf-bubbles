@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.text.TextUtils;
@@ -30,38 +31,35 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO GLOBAL refactor
+// TODO GLOBAL refactor
+// TODO refactor draw/remove Strokes methods
 public final class BubbleView extends ImageView {
     private final static String TAG = "BubbleView";
+    private final static float stdDist = 10f;
+    // режимы дейстий
+    private static final int NONE = 0;
+    private static final int DRAG = 1;
+    private static final int ZOOM = 2;
+    private static final int TAIL = 3;
+
+    private static int MODE = NONE;
 
     private Paint drawablePaint = new Paint(Paint.FILTER_BITMAP_FLAG);
     private Rect drawableRect = new Rect();
     private Paint textPaint = new Paint();
+    private Paint tailPaint = new Paint();
+
     private Bitmap image;
     private Context mContext;
     private int mScreenHeight, mScreenWidth, prevY, prevX, mImageWidth, mImageHeight, mTouchSlop,
-            mScaledImageWidth, mScaledImageHeight;
-    // TODO rename it
-    private int startXPosition, startYPosition = 10;
+            mScaledImageWidth, mScaledImageHeight, prevTailX, prevTailY;
     private Rect mImagePosition;
     private Region mImageRegion;
     private boolean canImageMove, isOnClick;
     private float mDownX;
     private float mDownY;
 
-    // TODO ??? what is treshold? why treshold?
-    private final float SCROLL_TRESHOLD = 10;
-
-    private static final int NONE = 0;
-    private static final int DRAG = 1;
-    private static final int ZOOM = 2;
-    private static int MODE = NONE;
-    // TODO rename
-    float oldDist;
-
-    // TODO more accuracy. rename it
-    private float x;
-    private float y;
+    private float movingDist;
 
     private BitmapFactory.Options options;
 
@@ -74,13 +72,11 @@ public final class BubbleView extends ImageView {
     private TextView textView;
 
     private boolean active;
+    private float tailLowXPoint = 0, tailLowYPoint = 0;
+    private boolean drawCircleTail = true;
 
     public TextView getTextView() {
         return textView;
-    }
-
-    public Bitmap getImage() {
-        return image;
     }
 
     public boolean isActive() {
@@ -123,34 +119,34 @@ public final class BubbleView extends ImageView {
         this.seekColor = seekColor;
     }
 
-    public void setText(String text) {
-        if (textView == null) {
-            textView = new TextView(mContext);
-            container.addView(textView);
+    @Override
+    public void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        // если изображение не установлено
+        if (image == null) {
+            drawablePaint.setStyle(Paint.Style.FILL);
+            drawablePaint.setColor(Color.WHITE);
+            if (mImagePosition == null) {
+                canvas.drawRect(10F, 10F, 10F, 10F, drawablePaint);
+                return;
+            }
+            canvas.drawRect(mImagePosition, textPaint);
+            return;
         }
 
-        textView.setText(text);
-        updateTextView();
-        scaleImage();
-        textView.postInvalidate();
-        postInvalidate();
-    }
+        drawablePaint.setAntiAlias(true);
+        drawablePaint.setFilterBitmap(false);
+        drawablePaint.setDither(true);
 
-    public void setBubbleDrawable(int drawableId) {
-        this.drawableId = drawableId;
-        options = new BitmapFactory.Options();
-        options.inScaled = false;
-        image = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
-        mImageHeight = image.getHeight();
-        mImageWidth = image.getWidth();
-        if (mImagePosition == null) {
-            mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
-            mImageRegion = new Region();
-            mImageRegion.set(mImagePosition);
-            scaleImage();
+        drawableRect.setEmpty();
+        drawableRect.set(0, 0, image.getWidth(), image.getHeight());
+        // рисуем рамку и пипку для управления хвостиком
+        if (active) {
+            drawStroke(canvas);
         }
-        updateTextView();
-        invalidate();
+        drawTail(canvas);
+
+        canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
     }
 
     @Override
@@ -160,28 +156,41 @@ public final class BubbleView extends ImageView {
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
-                MODE = DRAG;
-                isOnClick = true;
                 canImageMove = true;
                 prevX = positionX;
                 prevY = positionY;
                 // for listen on click tap
                 mDownX = event.getX();
                 mDownY = event.getY();
-                break;
+                // tail coordinates
+                prevTailX = positionX;
+                prevTailY = positionY;
 
+                float deltaXTail = positionX - tailLowXPoint;
+                float deltaYTail = positionY - tailLowYPoint;
+
+                // 20 20 -20 -20 - квадрат который означает что пользователь начала передвигать хвостик
+                if ((deltaXTail < 20 && deltaXTail < 20) && (deltaXTail > - 20 && deltaYTail > - 20)) {
+                    MODE = TAIL;
+                    break;
+                } else if (mImagePosition != null && mImagePosition.contains((int) mDownX, (int) mDownY)) {
+                    MODE = DRAG;
+                    break;
+                } else {
+                    isOnClick = true;
+                    break;
+                }
             case MotionEvent.ACTION_POINTER_DOWN:
-                oldDist = spacing(event);
-
-                // TODO constant
-                if (oldDist > 10f) {
+                movingDist = spacing(event);
+                if (movingDist > stdDist) {
                     MODE = ZOOM;
                 }
                 break;
 
             case MotionEvent.ACTION_MOVE:
-                if (canImageMove && (Math.abs(mDownX - event.getX()) > SCROLL_TRESHOLD
-                    || Math.abs(mDownY - event.getY()) > SCROLL_TRESHOLD)) {
+                float SCROLL_THRESHOLD = 10;
+                if (canImageMove && (Math.abs(mDownX - event.getX()) > SCROLL_THRESHOLD
+                        || Math.abs(mDownY - event.getY()) > SCROLL_THRESHOLD)) {
                     isOnClick = false;
                     // Check if we have moved far enough that it looks more like a
                     // scroll than a tap
@@ -205,14 +214,22 @@ public final class BubbleView extends ImageView {
                             invalidate();
                         }
                     } else if (MODE == ZOOM) {
-                        float newDist2 = spacing(event);
-                        // TODO constant
-                        if (newDist2 > 10f) {
-                            mScaledImageHeight = (int) (newDist2 / oldDist * mImageHeight);
-                            mScaledImageWidth = (int) (newDist2 / oldDist * mImageWidth);
+                        float newMovingDist = spacing(event);
+                        if (newMovingDist > stdDist) {
+                            mScaledImageHeight = (int) (newMovingDist / movingDist * mImageHeight);
+                            mScaledImageWidth = (int) (newMovingDist / movingDist * mImageWidth);
 
                             scaleImage();
                         }
+                    } else if (MODE == TAIL) {
+                        int deltaX = positionX - prevTailX;
+                        int deltaY = positionY - prevTailY;
+                        tailLowXPoint = tailLowXPoint + deltaX;
+                        tailLowYPoint = tailLowYPoint + deltaY;
+                        prevTailX = positionX;
+                        prevTailY = positionY;
+
+                        invalidate();
                     }
                 }
                 break;
@@ -222,7 +239,6 @@ public final class BubbleView extends ImageView {
                 MODE = NONE;
                 if (isOnClick) {
                     for (BubbleView bubble : bubbles) {
-                        // TODO may be try (how?) to remove activeBubble from list?
                         if (getBubbleId().equals(bubble.getBubbleId())) {
                             continue;
                         }
@@ -250,6 +266,129 @@ public final class BubbleView extends ImageView {
         return true;
     }
 
+    public void setText(String text) {
+        if (textView == null) {
+            textView = new TextView(mContext);
+            container.addView(textView);
+        }
+
+        textView.setText(text);
+        updateTextView();
+        scaleImage();
+        textView.postInvalidate();
+        postInvalidate();
+    }
+
+    public void setBubbleDrawable(int drawableId) {
+        this.drawableId = drawableId;
+        options = new BitmapFactory.Options();
+        options.inScaled = false;
+        image = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
+        mImageHeight = image.getHeight();
+        mImageWidth = image.getWidth();
+        if (mImagePosition == null) {
+            // начальные координаты изображения
+            int startYPosition = 10;
+            int startXPosition = 10;
+            mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
+            mImageRegion = new Region();
+            mImageRegion.set(mImagePosition);
+            scaleImage();
+        }
+        updateTextView();
+        invalidate();
+    }
+
+    private void drawTail(Canvas canvas) {
+        float left = mImagePosition.left;
+        float right = mImagePosition.right;
+        float bottom = mImagePosition.bottom;
+        float top = mImagePosition.top;
+
+        tailPaint.setStyle(Paint.Style.FILL);
+        tailPaint.setStrokeWidth(5);
+
+        if (mScaledImageHeight == 0) {
+            mScaledImageHeight = mImageHeight;
+            mScaledImageWidth = mImageWidth;
+        }
+
+        int centerX = mScaledImageWidth/2;
+
+        // TODO 50 - constant
+        if ((tailLowXPoint == left+centerX || tailLowXPoint == 0) &&
+                (tailLowYPoint == bottom+50 || tailLowYPoint == 0)) {
+            tailLowXPoint = left+centerX;
+            tailLowYPoint = bottom+50;
+        }
+
+        float startX1 = left+50;
+        float startY1 = bottom-5;
+        float startX2 = right-50;
+        float startY2 = bottom-5;
+
+        Log.d(TAG, "------------------------------------------------------------------------------");
+
+        Log.d(TAG, "left: " + left);
+        Log.d(TAG, "right: " + right);
+        Log.d(TAG, "top: " + top);
+        Log.d(TAG, "bottom: " + bottom);
+        Log.d(TAG, "tailLowXPoint: " + tailLowXPoint);
+        Log.d(TAG, "tailLowYPoint: " + tailLowYPoint);
+
+        Log.d(TAG, "------------------------------------------------------------------------------");
+
+        // down side
+        if (tailLowXPoint < right && tailLowYPoint > bottom+40) {
+            startX1 = left+50;
+            startY1 = bottom-5;
+            startX2 = right-50;
+            startY2 = bottom-5;
+            Log.d(TAG, "IT IS DOWN SIDE: tailLowXPoint < right && tailLowYPoint > bottom+40");
+        }
+
+        // left side
+        if (tailLowYPoint < bottom+40 &&  tailLowXPoint < left && tailLowXPoint < right) {
+            startX1 = left;
+            startY1 = top+30;
+            startX2 = left;
+            startY2 = bottom-30;
+            Log.d(TAG, "IT IS LEFT SIDE: tailLowYPoint < bottom+40 &&  tailLowXPoint < left && tailLowXPoint < right");
+        }
+
+        // up sidde
+        if (tailLowXPoint < right && tailLowYPoint < bottom+40 && tailLowXPoint > left) {
+            startX1 = left+50;
+            startY1 = top+10;
+            startX2 = right-50;
+            startY2 = top+10;
+            Log.d(TAG, "IT IS UP SIDE: tailLowXPoint < right && tailLowYPoint < bottom+40 &&  tailLowXPoint > left");
+        }
+
+        // right side
+        if (tailLowXPoint > right && tailLowYPoint < bottom) {
+            startX1 = right;
+            startY1 = top+30;
+            startX2 = right;
+            startY2 = bottom-30;
+            Log.d(TAG, "IT IS RIGHT SIDE: tailLowXPoint > right && tailLowYPoint > top-70 && tailLowXPoint > bottom");
+        }
+
+        Path fillPath = new Path();
+        fillPath.moveTo(startX1, startY1);
+        fillPath.lineTo(tailLowXPoint, tailLowYPoint);
+        fillPath.lineTo(startX2, startY2);
+
+        canvas.drawPath(fillPath, tailPaint);
+
+        if (drawCircleTail) {
+            canvas.drawCircle(tailLowXPoint, tailLowYPoint, 10, tailPaint);
+        }
+        // хвост как пряммые линии
+//        canvas.drawLine(startX1, startY1, tailLowXPoint, tailLowYPoint, paint);
+//        canvas.drawLine(startX2, startY2, tailLowXPoint, tailLowYPoint, paint);
+    }
+
     private void updateTextView() {
         if (textView != null) {
             int textW = mScaledImageWidth;
@@ -273,16 +412,10 @@ public final class BubbleView extends ImageView {
                     maxLines = mathLine;
                     break;
                 default:
-                    mathLine = 0;
                     maxLines = 1;
                     break;
             }
 
-            Log.d(TAG, "mScaledImageHeight" + mScaledImageHeight);
-
-            Log.d(TAG, "TextView TEST: " + mathLine);
-
-            Log.d(TAG, "TextView MAX: " + maxLines);
             textView.setMaxLines(maxLines);
             textView.setEllipsize(TextUtils.TruncateAt.END);
             textView.setLayoutParams(params);
@@ -302,12 +435,12 @@ public final class BubbleView extends ImageView {
     }
 
     public void scaleImage() {
-        // уменьшение изображения до размеров текста внутри бабла
+        // TODO продумать логику максимального и минимального размера бабла
+/*        // уменьшение изображения до размеров текста внутри бабла
         int minScaleHeight = 100;
         int minScaleWidth = 150;
         int maxScaleHeigth = 250;
-        int maxScaleWidth = 300;
-
+        int maxScaleWidth = 400;
         if (mScaledImageHeight <= minScaleHeight || mScaledImageWidth <= minScaleWidth) {
             mScaledImageHeight = minScaleHeight;
             mScaledImageWidth = minScaleWidth;
@@ -315,8 +448,8 @@ public final class BubbleView extends ImageView {
         } else if (mScaledImageHeight > maxScaleHeigth || mScaledImageWidth > maxScaleWidth) {
             mScaledImageHeight = maxScaleHeigth;
             mScaledImageWidth = maxScaleWidth;
-        }
-        // TODO constant
+        }*/
+
         options.inTargetDensity = 0;
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -343,39 +476,23 @@ public final class BubbleView extends ImageView {
         }
     }
 
-    @Override
-    public void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        // если изображение не установлено
-        if (image == null) {
-            drawablePaint.setStyle(Paint.Style.FILL);
-            drawablePaint.setColor(Color.WHITE);
-            if (mImagePosition == null) {
-                canvas.drawRect(10F, 10F, 10F, 10F, drawablePaint);
-                return;
-            }
-            canvas.drawRect(mImagePosition, textPaint);
-            return;
-        }
+    private void drawStroke(Canvas canvas) {
+        active = true;
+        drawCircleTail = true;
+        // раскомментировать если нужна будет рамка
+/*        Paint strokePaint = new Paint();
+        strokePaint.setColor(Color.BLACK); //set a color
+        strokePaint.setStrokeWidth(3); // set your stroke width
 
-        drawablePaint.setAntiAlias(true);
-        drawablePaint.setFilterBitmap(false);
-        drawablePaint.setDither(true);
-
-        drawableRect.setEmpty();
-        drawableRect.set(0, 0, image.getWidth(), image.getHeight());
-        // рисуем рамку
-        /*
-        if (active) {
-            drawStroke(canvas);
-        }
-        */
-
-        canvas.drawBitmap(image, drawableRect, mImagePosition, drawablePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.top-5, strokePaint);
+        canvas.drawLine(mImagePosition.right+5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.left-5, mImagePosition.bottom-5, strokePaint);
+        canvas.drawLine(mImagePosition.left-5, mImagePosition.bottom-5, mImagePosition.right+5, mImagePosition.bottom-5, strokePaint);*/
     }
 
     public void drawStroke() {
         active = true;
+        drawCircleTail = true;
         postInvalidate();
     }
 
@@ -388,27 +505,16 @@ public final class BubbleView extends ImageView {
         return null;
     }
 
-    private void drawStroke(Canvas canvas) {
-        active = true;
-        drawablePaint.setColor(Color.BLACK); //set a color
-        drawablePaint.setStrokeWidth(3); // set your stroke width
-
-        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.top-5, drawablePaint);
-        canvas.drawLine(mImagePosition.right+5, mImagePosition.top-5, mImagePosition.right+5, mImagePosition.bottom-5, drawablePaint);
-        canvas.drawLine(mImagePosition.left-5, mImagePosition.top-5, mImagePosition.left-5, mImagePosition.bottom-5, drawablePaint);
-        canvas.drawLine(mImagePosition.left-5, mImagePosition.bottom-5, mImagePosition.right+5, mImagePosition.bottom-5, drawablePaint);
-
-        postInvalidate();
-    }
-
     public void removeStroke() {
         active = false;
+        drawCircleTail = false;
         postInvalidate();
     }
 
     @Override
     public void setAlpha(int alpha) {
         drawablePaint.setAlpha(alpha);
+        tailPaint.setAlpha(alpha);
         postInvalidate();
     }
 
@@ -417,7 +523,14 @@ public final class BubbleView extends ImageView {
         postInvalidate();
     }
 
+    public void setTailColor(int color) {
+        tailPaint.setColor(color);
+        postInvalidate();
+    }
+
     private float spacing(MotionEvent event) {
+        float x = 0;
+        float y = 0;
         try {
             x = event.getX(0) - event.getX(1);
             y = event.getY(0) - event.getY(1);

@@ -62,6 +62,9 @@ public class BubbleActivity extends Activity {
         seekAlpha = (SeekBar) findViewById(R.id.seekAlpha);
         seekColor = (SeekBar) findViewById(R.id.seekColor);
 
+        seekColor.setProgress(1);
+        seekColor.setMax(BubbleSetColorSeekListener.max);
+
         animFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
         animBlink = AnimationUtils.loadAnimation(this, R.anim.blinking);
 
@@ -203,7 +206,7 @@ public class BubbleActivity extends Activity {
             }
         });
 
-        String photoPath = "/storage/sdcard0/DCIM/Camera/ContactPhoto-IMG_20130417_102638.jpg";
+        String photoPath = "/storage/sdcard0/Pictures/Instagram/IMG_20130629_145630.jpg";
         setPhoto(photoPath);
     }
 
