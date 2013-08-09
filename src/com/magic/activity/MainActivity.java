@@ -44,6 +44,15 @@ public class MainActivity extends Activity {
                 startActivity(galleryIntent);
             }
         });
+
+        Button cutPhotoBtn = (Button) findViewById(R.id.main_cut_photo_button);
+        cutPhotoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent galleryIntent = new Intent(getApplicationContext(), CutPhotoActivity.class);
+                startActivity(galleryIntent);
+            }
+        });
 	}
 
 	@Override

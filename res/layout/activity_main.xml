@@ -23,4 +23,10 @@
             android:text="Custom Gallery"
             android:id="@+id/main_gallery_button"
             />
+
+    <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Cut Photo"
+            android:id="@+id/main_cut_photo_button"/>
 </LinearLayout>

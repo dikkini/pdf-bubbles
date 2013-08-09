@@ -30,6 +30,7 @@
         <activity android:name=".activity.gallery.CustomGallery"/>
         <activity android:name=".pdf.PdfWizardActivity"/>
         <activity android:name=".pdf.PdfWizardShortStory"/>
+        <activity android:name=".activity.CutPhotoActivity"/>
     </application>
 
 </manifest>
