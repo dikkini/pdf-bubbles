@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -60,7 +61,13 @@ public class CutPhotoActivity extends Activity {
 
                 Paint paint = new Paint();
 
-                Bitmap newBitmap = Bitmap.createBitmap(bitmap, minX, minY, maxX-minX, maxY-minY);
+                Bitmap newBitmap;
+                try {
+                    newBitmap = Bitmap.createBitmap(bitmap, minX, minY, maxX-minX, maxY-minY);
+                } catch (IllegalArgumentException e) {
+                    Log.e(TAG, "" + e.toString());
+                    newBitmap = bitmap;
+                }
                 Canvas canvas = new Canvas(newBitmap);
 
                 canvas.drawBitmap(newBitmap, 0, 0, paint);
