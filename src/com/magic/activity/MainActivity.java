@@ -9,6 +9,7 @@ import android.widget.Button;
 
 import com.magic.R;
 import com.magic.activity.gallery.CustomGallery;
+import com.magic.drawgraphic.FingerPaint;
 import com.magic.pdf.PdfWizardActivity;
 
 public class MainActivity extends Activity {
@@ -50,6 +51,33 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Intent galleryIntent = new Intent(getApplicationContext(), CutPhotoActivity.class);
+                startActivity(galleryIntent);
+            }
+        });
+
+        Button lasticBtn = (Button) findViewById(R.id.main_lastic_button);
+        lasticBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent galleryIntent = new Intent(getApplicationContext(), LastikActivity.class);
+                startActivity(galleryIntent);
+            }
+        });
+
+        Button drawingBtn = (Button) findViewById(R.id.main_drawing_button);
+        drawingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent galleryIntent = new Intent(getApplicationContext(), DrawingActivity.class);
+                startActivity(galleryIntent);
+            }
+        });
+
+        Button fingerDrawBtn = (Button) findViewById(R.id.main_finger_draw_button);
+        fingerDrawBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent galleryIntent = new Intent(getApplicationContext(), FingerPaint.class);
                 startActivity(galleryIntent);
             }
         });

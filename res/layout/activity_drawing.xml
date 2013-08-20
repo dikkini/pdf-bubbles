@@ -7,27 +7,21 @@
         xmlns:magic="http://schemas.android.com/apk/res/com.magic"
         android:id="@+id/cut_photo_container">
 
-    <com.magic.views.CustomImageView
-            android:id="@+id/cut_photo_imageview"
+    <com.magic.views.CustomImageViewCurveLines
+            android:id="@+id/curve_lines_imageview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:layout_above="@+id/cut_photo_button"/>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cut Image"
-        android:id="@+id/cut_photo_button"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"/>
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentTop="true"/>
 
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Clear Image"
-            android:id="@+id/clear_image_button"
+            android:text="Cut it"
+            android:id="@+id/curve_lines_cut_area"
             android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"/>
+            android:layout_alignParentRight="true"/>
+
 </RelativeLayout>

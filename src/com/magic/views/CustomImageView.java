@@ -2,6 +2,7 @@ package com.magic.views;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -24,8 +25,9 @@ public class CustomImageView extends ImageView {
 
     private static final String TAG = "CustomImageView";
     private Bitmap bitmap;
+    private Bitmap sourceBitmap;
     private List<Point> pointsList = new ArrayList<>();
-    private static Paint paint;
+    private static Paint paint = new Paint();
 
     public Bitmap getBitmap() {
         return bitmap;
@@ -37,10 +39,6 @@ public class CustomImageView extends ImageView {
 
     public CustomImageView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        paint = new Paint();
-        String imgPath = "/storage/sdcard0/Pictures/Instagram/IMG_20130629_145630.jpg";
-        File file = new File(imgPath);
-        bitmap = BitmapUtils.decodeFile(file, 1024, 1024, false);
     }
 
     public CustomImageView(Context context, AttributeSet attrs, int defStyle) {
@@ -50,12 +48,32 @@ public class CustomImageView extends ImageView {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (bitmap == null) {
+            bitmap = BitmapFactory.decodeFile("/storage/sdcard0/Pictures/Instagram/IMG_20130629_145630.jpg");
+        }
         canvas.drawBitmap(bitmap, 0, 0, paint);
     }
 
     @Override
     public void setImageBitmap(Bitmap bmp) {
+        // первый вызов этого метода засетить исходное изображение
+        if (sourceBitmap == null) {
+            sourceBitmap = bmp;
+        }
+
         bitmap = bmp;
+        invalidate();
+    }
+
+    public void clearBitmap(int maxX, int minX, int maxY, int minY) {
+        if (sourceBitmap != null) {
+            if (maxX == 0 && minX == 0 && maxY == 0 && minY == 0) {
+                bitmap = sourceBitmap;
+            } else {
+                bitmap = Bitmap.createBitmap(sourceBitmap, minX, minY, maxX-minX, maxY-minY);
+            }
+        }
+        pointsList.clear();
         invalidate();
     }
 
