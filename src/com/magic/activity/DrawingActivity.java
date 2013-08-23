@@ -9,7 +9,6 @@ import android.widget.Button;
 import com.magic.BitmapUtils;
 import com.magic.R;
 import com.magic.views.CustomImageViewCurveLines;
-import com.magic.views.CustomImageViewLastic;
 
 import java.io.File;
 
@@ -20,7 +19,6 @@ public class DrawingActivity extends Activity {
 
     private static final String TAG = "DrawingActivity";
     private CustomImageViewCurveLines customImageView;
-    int maxX, minX, maxY, minY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +26,8 @@ public class DrawingActivity extends Activity {
         setContentView(R.layout.activity_drawing);
 
         customImageView = (CustomImageViewCurveLines) findViewById(R.id.curve_lines_imageview);
-        Button cutBtn = (Button) findViewById(R.id.curve_lines_cut_area);
+        Button drawTracery = (Button) findViewById(R.id.drawing_draw_tracery);
+        Button cutBtn = (Button) findViewById(R.id.drawing_cut_photo);
 
         String imgPath = "/storage/sdcard0/Pictures/Instagram/IMG_20130629_145630.jpg";
         File file = new File(imgPath);
@@ -36,10 +35,16 @@ public class DrawingActivity extends Activity {
 
         customImageView.setImageBitmap(bitmap);
 
+        drawTracery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customImageView.drawTracery();
+            }
+        });
         cutBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                customImageView.clipPath();
+                customImageView.clipArea();
             }
         });
     }

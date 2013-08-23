@@ -19,9 +19,17 @@
     <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Cut it"
-            android:id="@+id/curve_lines_cut_area"
+            android:text="Cut area"
+            android:id="@+id/drawing_cut_photo"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"/>
+
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Draw Tracery"
+            android:id="@+id/drawing_draw_tracery"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"/>
 
 </RelativeLayout>
