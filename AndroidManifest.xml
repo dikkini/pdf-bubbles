@@ -31,7 +31,7 @@
         <activity android:name=".pdf.PdfWizardActivity"/>
         <activity android:name=".pdf.PdfWizardShortStory"/>
         <activity android:name=".activity.CutPhotoActivity"/>
-        <activity android:name=".activity.LastikActivity"/>
+        <activity android:name=".activity.FiguresActivity"/>
         <activity android:name=".drawgraphic.FingerPaint"/>
         <activity android:hardwareAccelerated="false" android:name=".activity.DrawingActivity"/>
     </application>

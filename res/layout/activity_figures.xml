@@ -7,7 +7,7 @@
         xmlns:magic="http://schemas.android.com/apk/res/com.magic"
         android:id="@+id/cut_photo_container">
 
-    <com.magic.views.CustomImageViewLastic
+    <com.magic.views.CustomViewFigures
             android:id="@+id/cut_photo_imageview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -34,7 +34,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:text="Lastic"
-            android:id="@+id/main_lastic_button"/>
+            android:id="@+id/main_figures_button"/>
 
     <Button
             android:layout_width="fill_parent"

@@ -55,12 +55,12 @@ public class MainActivity extends Activity {
             }
         });
 
-        Button lasticBtn = (Button) findViewById(R.id.main_lastic_button);
-        lasticBtn.setOnClickListener(new View.OnClickListener() {
+        Button figuresBtn = (Button) findViewById(R.id.main_figures_button);
+        figuresBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent galleryIntent = new Intent(getApplicationContext(), LastikActivity.class);
-                startActivity(galleryIntent);
+                Intent figuresIntent = new Intent(getApplicationContext(), FiguresActivity.class);
+                startActivity(figuresIntent);
             }
         });
 
