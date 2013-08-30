@@ -6,7 +6,6 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -38,10 +37,20 @@ public class CustomViewFigures extends ImageView {
 
     // режимы дейстий
     private static final int NONE = 0;
-    private static final int MOVING = 1;
-    private static final int NOT_MOVING = 2;
+    private static final int POLYGON_POINT_MOVING = 1;
+    private static final int MOVING_FIGURE = 2;
+    private static final int RESIZING_FIGURE = 3;
 
-    private static int MODE = NONE;
+    private static int ACTION = NONE;
+
+    // фигуры
+    private static final String NON = "";
+    private static final String TRIANGLE = "TRIANGLE";
+    private static final String SQUARE = "SQUARE";
+    private static final String CIRCLE = "CIRCLE";
+    private static final String POLYGON = "POLYGON";
+
+    private static String FIGURE = NON;
 
     private Integer movingPointId;
     private float movingX, movingY, prevMovingX, prevMovingY;
@@ -77,17 +86,26 @@ public class CustomViewFigures extends ImageView {
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
-        drawTriangle(canvas);
+
+        if (pointList != null) {
+            drawFigure(canvas);
+        }
     }
 
     @Override
     public void setImageBitmap(Bitmap bm) {
-        mBitmap = bm;
         mBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
+        clearFigure();
+
+        invalidate();
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        if (pointList == null) {
+            return false;
+        }
+
         // TODO ограничить выезд за границы экрана
 
         int positionX = (int) event.getRawX();
@@ -105,7 +123,7 @@ public class CustomViewFigures extends ImageView {
                         movingX = point.getX();
                         movingY = point.getY();
 
-                        MODE = MOVING;
+                        ACTION = POLYGON_POINT_MOVING;
                     }
                 }
 
@@ -116,7 +134,7 @@ public class CustomViewFigures extends ImageView {
             }
 
             case MotionEvent.ACTION_MOVE: {
-                if (MODE == MOVING) {
+                if (ACTION == POLYGON_POINT_MOVING) {
                     float deltaX = positionX - prevMovingX;
                     float deltaY = positionY - prevMovingY;
                     movingX = movingX + deltaX;
@@ -143,7 +161,7 @@ public class CustomViewFigures extends ImageView {
         return true;
     }
 
-    public void drawTriangle(Canvas canvas) {
+    public void drawFigure(Canvas canvas) {
         mPath = new Path();
 
         mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
@@ -161,6 +179,8 @@ public class CustomViewFigures extends ImageView {
     }
 
     public void initTriangle() {
+        FIGURE = TRIANGLE;
+
         pointList = new ArrayList<>();
         pointList.add(new FigurePoint(1, 100, 100));
         pointList.add(new FigurePoint(2, 100, 500));
@@ -170,6 +190,8 @@ public class CustomViewFigures extends ImageView {
     }
 
     public void initSquare() {
+        FIGURE = SQUARE;
+
         pointList = new ArrayList<>();
         pointList.add(new FigurePoint(1, 100, 100));
         pointList.add(new FigurePoint(2, 500, 100));
@@ -180,12 +202,19 @@ public class CustomViewFigures extends ImageView {
     }
 
     public void initCircle() {
+        FIGURE = CIRCLE;
         // TODO circle
     }
 
-
+    public void initPolygon() {
+        FIGURE = POLYGON;
+        // TODO polygon
+    }
 
     public void clipArea() {
+        if (mPath == null) {
+            return;
+        }
         Bitmap output = Bitmap.createBitmap(mBitmap.getWidth(), mBitmap.getHeight(),
                 Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
@@ -205,6 +234,14 @@ public class CustomViewFigures extends ImageView {
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(mBitmap, rect, rect, paint);
         mBitmap = output;
+
+        clearFigure();
+    }
+
+    private void clearFigure() {
+        pointList = null;
+        mPath = null;
+
         invalidate();
     }
 }

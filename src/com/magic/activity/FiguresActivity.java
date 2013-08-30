@@ -19,7 +19,6 @@ public class FiguresActivity extends Activity {
 
     private static final String TAG = "CutPhoto";
     private CustomViewFigures customImageView;
-    int maxX, minX, maxY, minY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +28,12 @@ public class FiguresActivity extends Activity {
         customImageView = (CustomViewFigures) findViewById(R.id.cut_photo_imageview);
 
         Button clearImageBtn = (Button) findViewById(R.id.figures_clear);
-        
+        clearImageBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customImageView.setImageBitmap(getBitmap());
+            }
+        });
 
         Button squareInitBtn = (Button) findViewById(R.id.figures_square);
         squareInitBtn.setOnClickListener(new View.OnClickListener() {
@@ -63,10 +67,12 @@ public class FiguresActivity extends Activity {
             }
         });
 
+        customImageView.setImageBitmap(getBitmap());
+    }
+
+    private Bitmap getBitmap() {
         String imgPath = "/storage/sdcard0/Pictures/Instagram/IMG_20130629_145630.jpg";
         File file = new File(imgPath);
-        Bitmap bitmap = BitmapUtils.decodeFile(file, 1024, 1024, false);
-
-        customImageView.setImageBitmap(bitmap);
+        return BitmapUtils.decodeFile(file, 1024, 1024, false);
     }
 }
