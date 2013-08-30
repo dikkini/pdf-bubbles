@@ -84,8 +84,6 @@ public class CustomViewFigures extends ImageView {
     public void setImageBitmap(Bitmap bm) {
         mBitmap = bm;
         mBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
-
-        initTriangle();
     }
 
     @Override
@@ -162,12 +160,30 @@ public class CustomViewFigures extends ImageView {
         canvas.drawPath(mPath, mPathPaint);
     }
 
-    private void initTriangle() {
+    public void initTriangle() {
         pointList = new ArrayList<>();
         pointList.add(new FigurePoint(1, 100, 100));
         pointList.add(new FigurePoint(2, 100, 500));
         pointList.add(new FigurePoint(3, 400, 500));
+
+        invalidate();
     }
+
+    public void initSquare() {
+        pointList = new ArrayList<>();
+        pointList.add(new FigurePoint(1, 100, 100));
+        pointList.add(new FigurePoint(2, 500, 100));
+        pointList.add(new FigurePoint(3, 500, 500));
+        pointList.add(new FigurePoint(4, 100, 500));
+
+        invalidate();
+    }
+
+    public void initCircle() {
+        // TODO circle
+    }
+
+
 
     public void clipArea() {
         Bitmap output = Bitmap.createBitmap(mBitmap.getWidth(), mBitmap.getHeight(),

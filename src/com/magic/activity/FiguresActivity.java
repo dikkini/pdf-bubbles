@@ -27,8 +27,35 @@ public class FiguresActivity extends Activity {
         setContentView(R.layout.activity_figures);
 
         customImageView = (CustomViewFigures) findViewById(R.id.cut_photo_imageview);
-        Button clipAreBtn = (Button) findViewById(R.id.figures_triangle);
 
+        Button clearImageBtn = (Button) findViewById(R.id.figures_clear);
+        
+
+        Button squareInitBtn = (Button) findViewById(R.id.figures_square);
+        squareInitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customImageView.initSquare();
+            }
+        });
+
+        Button circleInitBtn = (Button) findViewById(R.id.figures_circle);
+        circleInitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customImageView.initCircle();
+            }
+        });
+
+        Button triangleInitBtn = (Button) findViewById(R.id.figures_triangle);
+        triangleInitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customImageView.initTriangle();
+            }
+        });
+
+        Button clipAreBtn = (Button) findViewById(R.id.figures_clip_area);
         clipAreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

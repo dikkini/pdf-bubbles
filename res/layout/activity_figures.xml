@@ -55,6 +55,20 @@
                     android:layout_height="wrap_content"
                     android:text="Polygon"
                     android:id="@+id/figures_polygon"/>
+
+            <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ClipArea"
+                    android:id="@+id/figures_clip_area"/>
+
+            <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ClearImage"
+                    android:id="@+id/figures_clear"/>
         </LinearLayout>
     </HorizontalScrollView>
 
