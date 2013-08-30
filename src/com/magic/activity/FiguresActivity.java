@@ -3,6 +3,8 @@ package com.magic.activity;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import com.magic.BitmapUtils;
 import com.magic.R;
@@ -25,6 +27,14 @@ public class FiguresActivity extends Activity {
         setContentView(R.layout.activity_figures);
 
         customImageView = (CustomViewFigures) findViewById(R.id.cut_photo_imageview);
+        Button clipAreBtn = (Button) findViewById(R.id.figures_triangle);
+
+        clipAreBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customImageView.clipArea();
+            }
+        });
 
         String imgPath = "/storage/sdcard0/Pictures/Instagram/IMG_20130629_145630.jpg";
         File file = new File(imgPath);

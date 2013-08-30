@@ -12,6 +12,50 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
+            android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"/>
+            android:layout_above="@+id/horizontalScrollView"/>
+
+    <HorizontalScrollView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/horizontalScrollView"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true">
+
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+            <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Circle"
+                    android:id="@+id/figures_circle"/>
+
+            <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Square"
+                    android:id="@+id/figures_square"/>
+
+            <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Triangle"
+                    android:id="@+id/figures_triangle"/>
+
+            <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Polygon"
+                    android:id="@+id/figures_polygon"/>
+        </LinearLayout>
+    </HorizontalScrollView>
+
 </RelativeLayout>
