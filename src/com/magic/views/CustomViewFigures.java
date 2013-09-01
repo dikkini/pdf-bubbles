@@ -9,6 +9,7 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
+import android.graphics.Region;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ImageView;
@@ -45,8 +46,7 @@ public class CustomViewFigures extends ImageView {
 
     // фигуры
     private static final String NON = "";
-    private static final String TRIANGLE = "TRIANGLE";
-    private static final String SQUARE = "SQUARE";
+    private static final String STATIC = "STATIC";
     private static final String CIRCLE = "CIRCLE";
     private static final String POLYGON = "POLYGON";
 
@@ -115,26 +115,29 @@ public class CustomViewFigures extends ImageView {
             case MotionEvent.ACTION_DOWN: {
                 float deltaX;
                 float deltaY;
-                for (FigurePoint point : pointList) {
-                    deltaX = positionX - point.getX();
-                    deltaY = positionY - point.getY();
-                    if (deltaX < 40 && (deltaX > -40 && deltaY > -40)) {
-                        movingPointId = point.getId();
-                        movingX = point.getX();
-                        movingY = point.getY();
+                if (FIGURE.equals(POLYGON)) {
+                    for (FigurePoint point : pointList) {
+                        deltaX = positionX - point.getX();
+                        deltaY = positionY - point.getY();
+                        if (deltaX < 40 && (deltaX > -40 && deltaY > -40)) {
+                            movingPointId = point.getId();
+                            movingX = point.getX();
+                            movingY = point.getY();
 
-                        ACTION = POLYGON_POINT_MOVING;
+                            ACTION = POLYGON_POINT_MOVING;
+                        }
                     }
+                } else if (FIGURE.equals(STATIC)) {
+                    ACTION = MOVING_FIGURE;
                 }
 
                 prevMovingX = positionX;
                 prevMovingY = positionY;
-
                 break;
             }
 
             case MotionEvent.ACTION_MOVE: {
-                if (ACTION == POLYGON_POINT_MOVING) {
+                if (FIGURE.equals(POLYGON) && ACTION == POLYGON_POINT_MOVING) {
                     float deltaX = positionX - prevMovingX;
                     float deltaY = positionY - prevMovingY;
                     movingX = movingX + deltaX;
@@ -147,6 +150,16 @@ public class CustomViewFigures extends ImageView {
                             point.setX(movingX);
                             point.setY(movingY);
                         }
+                    }
+
+                    invalidate();
+                } else if (ACTION == MOVING_FIGURE) {
+                    float deltaX = positionX - prevMovingX;
+                    float deltaY = positionY - prevMovingY;
+
+                    for (FigurePoint point : pointList) {
+                        point.setX(point.getX() + deltaX);
+                        point.setY(point.getY() + deltaY);
                     }
 
                     invalidate();
@@ -178,8 +191,20 @@ public class CustomViewFigures extends ImageView {
         canvas.drawPath(mPath, mPathPaint);
     }
 
+    private Path getPath(List<FigurePoint> points) {
+        Path p = new Path();
+
+        p.moveTo(points.get(0).getX(), points.get(0).getY());
+        for (FigurePoint point : points) {
+            p.lineTo(point.getX(), point.getY());
+            p.lineTo(point.getX(), point.getY());
+            p.lineTo(point.getX(), point.getY());
+        }
+        return p;
+    }
+
     public void initTriangle() {
-        FIGURE = TRIANGLE;
+        FIGURE = STATIC;
 
         pointList = new ArrayList<>();
         pointList.add(new FigurePoint(1, 100, 100));
@@ -190,7 +215,7 @@ public class CustomViewFigures extends ImageView {
     }
 
     public void initSquare() {
-        FIGURE = SQUARE;
+        FIGURE = STATIC;
 
         pointList = new ArrayList<>();
         pointList.add(new FigurePoint(1, 100, 100));
