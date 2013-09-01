@@ -35,6 +35,14 @@ public class FiguresActivity extends Activity {
             }
         });
 
+        Button polygonInitBtn = (Button) findViewById(R.id.figures_polygon);
+        polygonInitBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customImageView.setImageBitmap(getBitmap());
+            }
+        });
+
         Button squareInitBtn = (Button) findViewById(R.id.figures_square);
         squareInitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
