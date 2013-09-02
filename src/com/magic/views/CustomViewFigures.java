@@ -9,10 +9,10 @@ import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.graphics.Region;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.magic.models.FigurePoint;
 
@@ -39,8 +39,9 @@ public class CustomViewFigures extends ImageView {
     // режимы дейстий
     private static final int NONE = 0;
     private static final int POLYGON_POINT_MOVING = 1;
-    private static final int MOVING_FIGURE = 2;
-    private static final int RESIZING_FIGURE = 3;
+    private static final int POLYGON_DRAWING = 2;
+    private static final int MOVING_STATIC_FIGURE = 3;
+    private static final int RESIZING_FIGURE = 4;
 
     private static int ACTION = NONE;
 
@@ -52,7 +53,7 @@ public class CustomViewFigures extends ImageView {
 
     private static String FIGURE = NON;
 
-    private Integer movingPointId;
+    private Integer movingPointId, plogyPointsCount;
     private float movingX, movingY, prevMovingX, prevMovingY, deltaX, deltaY;
 
     public CustomViewFigures(Context context) {
@@ -87,7 +88,7 @@ public class CustomViewFigures extends ImageView {
         super.onDraw(canvas);
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
 
-        if (pointList != null) {
+        if (pointList != null && pointList.size() > 0) {
             drawFigure(canvas);
         }
     }
@@ -115,7 +116,7 @@ public class CustomViewFigures extends ImageView {
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                if (FIGURE.equals(POLYGON)) {
+                if (FIGURE.equals(POLYGON) && ACTION == POLYGON_POINT_MOVING) {
                     for (FigurePoint point : pointList) {
                         deltaX = positionX - point.getX();
                         deltaY = positionY - point.getY();
@@ -123,12 +124,10 @@ public class CustomViewFigures extends ImageView {
                             movingPointId = point.getId();
                             movingX = point.getX();
                             movingY = point.getY();
-
-                            ACTION = POLYGON_POINT_MOVING;
                         }
                     }
                 } else if (FIGURE.equals(STATIC)) {
-                    ACTION = MOVING_FIGURE;
+                    ACTION = MOVING_STATIC_FIGURE;
                 }
 
                 prevMovingX = positionX;
@@ -137,7 +136,7 @@ public class CustomViewFigures extends ImageView {
             }
 
             case MotionEvent.ACTION_MOVE: {
-                if (FIGURE.equals(POLYGON) && ACTION == POLYGON_POINT_MOVING) {
+                if (ACTION == POLYGON_POINT_MOVING) {
                     movingX = movingX + deltaX;
                     movingY = movingY + deltaY;
                     prevMovingX = positionX;
@@ -151,7 +150,7 @@ public class CustomViewFigures extends ImageView {
                     }
 
                     invalidate();
-                } else if (ACTION == MOVING_FIGURE) {
+                } else if (ACTION == MOVING_STATIC_FIGURE) {
                     deltaX = positionX - prevMovingX;
                     deltaY = positionY - prevMovingY;
                     prevMovingX = positionX;
@@ -168,6 +167,10 @@ public class CustomViewFigures extends ImageView {
             }
 
             case MotionEvent.ACTION_UP:
+                if (ACTION == POLYGON_DRAWING) {
+                    FigurePoint touchPoint = new FigurePoint(plogyPointsCount++, positionX, positionY);
+                    pointList.add(touchPoint);
+                }
                 break;
 
         }
@@ -184,7 +187,9 @@ public class CustomViewFigures extends ImageView {
             mPath.lineTo(point.getX(), point.getY());
 
             // draw points of changing polygon
-//            canvas.drawCircle(point.getX(), point.getY(), 20, mPointsPaint);
+            if (FIGURE.equals(POLYGON)) {
+                canvas.drawCircle(point.getX(), point.getY(), 10, mPointsPaint);
+            }
         }
 
         mPath.close();
@@ -232,14 +237,27 @@ public class CustomViewFigures extends ImageView {
         // TODO circle
     }
 
-    public void initPolygon() {
+    public void initPolygon(boolean draw) {
         FIGURE = POLYGON;
+        if (draw) {
+            ACTION = POLYGON_POINT_MOVING;
+            invalidate();
+        } else {
+            pointList = new ArrayList<>();
+            plogyPointsCount = 0;
+            ACTION = POLYGON_DRAWING;
+            Toast.makeText(getContext(), "Начните рисовать точки полигона", Toast.LENGTH_LONG).show();
+            invalidate();
+        }
+    }
 
-        pointList = new ArrayList<>();
-        pointList.add(new FigurePoint(1, 100, 100));
-        pointList.add(new FigurePoint(2, 500, 100));
-        pointList.add(new FigurePoint(3, 500, 500));
-        pointList.add(new FigurePoint(4, 100, 500));
+    private void drawPolygonPoint(FigurePoint point) {
+        Paint pointPaint = new Paint();
+        pointPaint.setColor(Color.RED);
+        pointPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+
+        Canvas canvas = new Canvas(mBitmap);
+        canvas.drawCircle(point.getX(), point.getY(), 10, pointPaint);
 
         invalidate();
     }

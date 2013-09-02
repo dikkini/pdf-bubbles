@@ -57,6 +57,13 @@
                     android:id="@+id/figures_polygon"/>
 
             <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FinishPolygon"
+                android:id="@+id/figures_polygon_finish"/>
+
+            <Button
                     style="?android:attr/buttonStyleSmall"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"

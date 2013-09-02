@@ -39,7 +39,14 @@ public class FiguresActivity extends Activity {
         polygonInitBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                customImageView.setImageBitmap(getBitmap());
+                customImageView.initPolygon(false);
+            }
+        });
+        Button polygonFinishBtn = (Button) findViewById(R.id.figures_polygon_finish);
+        polygonFinishBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customImageView.initPolygon(true);
             }
         });
 
