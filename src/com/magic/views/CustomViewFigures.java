@@ -180,7 +180,10 @@ public class CustomViewFigures extends ImageView {
     public void drawFigure(Canvas canvas) {
         mPath = new Path();
 
-        mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
+        if (!FIGURE.equals(POLYGON)) {
+            mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
+        }
+
         for (FigurePoint point : pointList) {
             mPath.lineTo(point.getX(), point.getY());
             mPath.lineTo(point.getX(), point.getY());
