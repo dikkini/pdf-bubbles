@@ -53,7 +53,7 @@ public class CustomViewFigures extends ImageView {
     private static String FIGURE = NON;
 
     private Integer movingPointId;
-    private float movingX, movingY, prevMovingX, prevMovingY;
+    private float movingX, movingY, prevMovingX, prevMovingY, deltaX, deltaY;
 
     public CustomViewFigures(Context context) {
         super(context);
@@ -110,11 +110,11 @@ public class CustomViewFigures extends ImageView {
 
         int positionX = (int) event.getRawX();
         int positionY = (int) event.getRawY();
+        deltaX = positionX - prevMovingX;
+        deltaY = positionY - prevMovingY;
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
-                float deltaX;
-                float deltaY;
                 if (FIGURE.equals(POLYGON)) {
                     for (FigurePoint point : pointList) {
                         deltaX = positionX - point.getX();
@@ -138,8 +138,6 @@ public class CustomViewFigures extends ImageView {
 
             case MotionEvent.ACTION_MOVE: {
                 if (FIGURE.equals(POLYGON) && ACTION == POLYGON_POINT_MOVING) {
-                    float deltaX = positionX - prevMovingX;
-                    float deltaY = positionY - prevMovingY;
                     movingX = movingX + deltaX;
                     movingY = movingY + deltaY;
                     prevMovingX = positionX;
@@ -154,8 +152,10 @@ public class CustomViewFigures extends ImageView {
 
                     invalidate();
                 } else if (ACTION == MOVING_FIGURE) {
-                    float deltaX = positionX - prevMovingX;
-                    float deltaY = positionY - prevMovingY;
+                    deltaX = positionX - prevMovingX;
+                    deltaY = positionY - prevMovingY;
+                    prevMovingX = positionX;
+                    prevMovingY = positionY;
 
                     for (FigurePoint point : pointList) {
                         point.setX(point.getX() + deltaX);
@@ -183,7 +183,8 @@ public class CustomViewFigures extends ImageView {
             mPath.lineTo(point.getX(), point.getY());
             mPath.lineTo(point.getX(), point.getY());
 
-            canvas.drawCircle(point.getX(), point.getY(), 20, mPointsPaint);
+            // draw points of changing polygon
+//            canvas.drawCircle(point.getX(), point.getY(), 20, mPointsPaint);
         }
 
         mPath.close();
@@ -233,7 +234,14 @@ public class CustomViewFigures extends ImageView {
 
     public void initPolygon() {
         FIGURE = POLYGON;
-        // TODO polygon
+
+        pointList = new ArrayList<>();
+        pointList.add(new FigurePoint(1, 100, 100));
+        pointList.add(new FigurePoint(2, 500, 100));
+        pointList.add(new FigurePoint(3, 500, 500));
+        pointList.add(new FigurePoint(4, 100, 500));
+
+        invalidate();
     }
 
     public void clipArea() {
