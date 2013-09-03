@@ -27,6 +27,7 @@ public class CustomViewFigures extends ImageView {
     private static final String TAG = "CustomViewFigures";
 
     private Bitmap mBitmap;
+    private Bitmap srcBitmap;
     private Paint mBitmapPaint;
     private Paint mPathPaint;
     private Paint mPointsPaint;
@@ -50,6 +51,7 @@ public class CustomViewFigures extends ImageView {
     private static final String STATIC = "STATIC";
     private static final String CIRCLE = "CIRCLE";
     private static final String POLYGON = "POLYGON";
+    private static final String HALF_POLYGON = "HALF_POLYGON";
 
     private static String FIGURE = NON;
 
@@ -88,13 +90,24 @@ public class CustomViewFigures extends ImageView {
         super.onDraw(canvas);
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
 
-        if (pointList != null && pointList.size() > 0) {
-            drawFigure(canvas);
+        if (pointList == null || pointList.isEmpty()) {
+            return;
+        }
+
+        switch (FIGURE) {
+            case STATIC:
+            case POLYGON:
+                drawFigure(canvas);
+                break;
+            case HALF_POLYGON:
+                drawPolygon(canvas);
+                break;
         }
     }
 
     @Override
     public void setImageBitmap(Bitmap bm) {
+        srcBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
         mBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
         clearFigure();
 
@@ -170,6 +183,8 @@ public class CustomViewFigures extends ImageView {
                 if (ACTION == POLYGON_DRAWING) {
                     FigurePoint touchPoint = new FigurePoint(plogyPointsCount++, positionX, positionY);
                     pointList.add(touchPoint);
+
+                    invalidate();
                 }
                 break;
 
@@ -179,11 +194,7 @@ public class CustomViewFigures extends ImageView {
 
     public void drawFigure(Canvas canvas) {
         mPath = new Path();
-
-        if (!FIGURE.equals(POLYGON)) {
-            mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
-        }
-
+        mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
         for (FigurePoint point : pointList) {
             mPath.lineTo(point.getX(), point.getY());
             mPath.lineTo(point.getX(), point.getY());
@@ -194,22 +205,9 @@ public class CustomViewFigures extends ImageView {
                 canvas.drawCircle(point.getX(), point.getY(), 10, mPointsPaint);
             }
         }
-
         mPath.close();
 
         canvas.drawPath(mPath, mPathPaint);
-    }
-
-    private Path getPath(List<FigurePoint> points) {
-        Path p = new Path();
-
-        p.moveTo(points.get(0).getX(), points.get(0).getY());
-        for (FigurePoint point : points) {
-            p.lineTo(point.getX(), point.getY());
-            p.lineTo(point.getX(), point.getY());
-            p.lineTo(point.getX(), point.getY());
-        }
-        return p;
     }
 
     public void initTriangle() {
@@ -241,11 +239,14 @@ public class CustomViewFigures extends ImageView {
     }
 
     public void initPolygon(boolean draw) {
-        FIGURE = POLYGON;
         if (draw) {
+            FIGURE = POLYGON;
             ACTION = POLYGON_POINT_MOVING;
+            // очишение от точек
+            clearBitmap();
             invalidate();
         } else {
+            FIGURE = HALF_POLYGON;
             pointList = new ArrayList<>();
             plogyPointsCount = 0;
             ACTION = POLYGON_DRAWING;
@@ -254,13 +255,22 @@ public class CustomViewFigures extends ImageView {
         }
     }
 
-    private void drawPolygonPoint(FigurePoint point) {
+    private void drawPolygon(Canvas canvas) {
         Paint pointPaint = new Paint();
         pointPaint.setColor(Color.RED);
         pointPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
-        Canvas canvas = new Canvas(mBitmap);
-        canvas.drawCircle(point.getX(), point.getY(), 10, pointPaint);
+        mPath = new Path();
+        mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
+        for (int i = 1; i < pointList.size()-1; i++) {
+            mPath.lineTo(pointList.get(i).getX(), pointList.get(i).getY());
+
+            canvas.drawCircle(pointList.get(i).getX(), pointList.get(i).getY(), 10, mPointsPaint);
+        }
+
+        mPath.close();
+
+        canvas.drawPath(mPath, mPathPaint);
 
         invalidate();
     }
@@ -295,7 +305,11 @@ public class CustomViewFigures extends ImageView {
     private void clearFigure() {
         pointList = null;
         mPath = null;
+        invalidate();
+    }
 
+    private void clearBitmap() {
+        mBitmap = srcBitmap;
         invalidate();
     }
 }
