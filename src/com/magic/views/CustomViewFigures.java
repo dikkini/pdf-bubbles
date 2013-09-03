@@ -10,6 +10,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.FloatMath;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -36,6 +38,7 @@ public class CustomViewFigures extends ImageView {
 
     private float mX, mY;
     private static final float TOUCH_TOLERANCE = 4;
+    private final static float stdDist = 10f;
 
     // режимы дейстий
     private static final int NONE = 0;
@@ -57,6 +60,7 @@ public class CustomViewFigures extends ImageView {
 
     private Integer movingPointId, plogyPointsCount;
     private float movingX, movingY, prevMovingX, prevMovingY, deltaX, deltaY;
+    private float movingDist;
 
     public CustomViewFigures(Context context) {
         super(context);
@@ -133,7 +137,7 @@ public class CustomViewFigures extends ImageView {
                     for (FigurePoint point : pointList) {
                         deltaX = positionX - point.getX();
                         deltaY = positionY - point.getY();
-                        if (deltaX < 40 && (deltaX > -40 && deltaY > -40)) {
+                        if (deltaX < 20 && (deltaX > -20 && deltaY > -20)) {
                             movingPointId = point.getId();
                             movingX = point.getX();
                             movingY = point.getY();
@@ -175,9 +179,25 @@ public class CustomViewFigures extends ImageView {
                     }
 
                     invalidate();
+                } else if (ACTION == RESIZING_FIGURE) {
+                    float newMovingDist = spacing(event);
+                    if (newMovingDist > stdDist) {
+                        for (FigurePoint point : pointList) {
+                            point.setX((int) (newMovingDist / movingDist * point.getX()));
+                            point.setY((int) (newMovingDist / movingDist * point.getY()));
+                        }
+                        invalidate();
+                    }
                 }
                 break;
             }
+
+            case MotionEvent.ACTION_POINTER_DOWN:
+                movingDist = spacing(event);
+                if (movingDist > stdDist) {
+                    ACTION = RESIZING_FIGURE;
+                }
+                break;
 
             case MotionEvent.ACTION_UP:
                 if (ACTION == POLYGON_DRAWING) {
@@ -301,5 +321,18 @@ public class CustomViewFigures extends ImageView {
     private void clearBitmap() {
         mBitmap = srcBitmap;
         invalidate();
+    }
+
+    private float spacing(MotionEvent event) {
+        float x = 0;
+        float y = 0;
+        try {
+            x = event.getX(0) - event.getX(1);
+            y = event.getY(0) - event.getY(1);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            Log.d("spacing", "pointerIndex exception");
+        }
+        return FloatMath.sqrt(x * x + y * y);
     }
 }
