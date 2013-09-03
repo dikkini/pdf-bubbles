@@ -100,7 +100,7 @@ public class CustomViewFigures extends ImageView {
                 drawFigure(canvas);
                 break;
             case HALF_POLYGON:
-                drawPolygon(canvas);
+                drawPolyLine(canvas);
                 break;
         }
     }
@@ -192,7 +192,7 @@ public class CustomViewFigures extends ImageView {
         return true;
     }
 
-    public void drawFigure(Canvas canvas) {
+    private void drawFigure(Canvas canvas) {
         mPath = new Path();
         mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
         for (FigurePoint point : pointList) {
@@ -208,6 +208,16 @@ public class CustomViewFigures extends ImageView {
         mPath.close();
 
         canvas.drawPath(mPath, mPathPaint);
+    }
+
+    private void drawPolyLine(Canvas canvas) {
+        for (int i = 0; i < pointList.size(); i++) {
+            canvas.drawCircle(pointList.get(i).getX(), pointList.get(i).getY(), 10, mPointsPaint);
+            if (i+1 < pointList.size()) {
+                canvas.drawLine(pointList.get(i).getX(), pointList.get(i).getY(),
+                        pointList.get(i+1).getX(), pointList.get(i+1).getY(), mPathPaint);
+            }
+        }
     }
 
     public void initTriangle() {
@@ -253,26 +263,6 @@ public class CustomViewFigures extends ImageView {
             Toast.makeText(getContext(), "Начните рисовать точки полигона", Toast.LENGTH_LONG).show();
             invalidate();
         }
-    }
-
-    private void drawPolygon(Canvas canvas) {
-        Paint pointPaint = new Paint();
-        pointPaint.setColor(Color.RED);
-        pointPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-
-        mPath = new Path();
-        mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
-        for (int i = 1; i < pointList.size()-1; i++) {
-            mPath.lineTo(pointList.get(i).getX(), pointList.get(i).getY());
-
-            canvas.drawCircle(pointList.get(i).getX(), pointList.get(i).getY(), 10, mPointsPaint);
-        }
-
-        mPath.close();
-
-        canvas.drawPath(mPath, mPathPaint);
-
-        invalidate();
     }
 
     public void clipArea() {
