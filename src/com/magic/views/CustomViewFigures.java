@@ -54,12 +54,13 @@ public class CustomViewFigures extends ImageView {
     private static final String STATIC = "STATIC";
     private static final String CIRCLE = "CIRCLE";
     private static final String POLYGON = "POLYGON";
-    private static final String HALF_POLYGON = "HALF_POLYGON";
+    // часть полигона. фигура при отрисовки пользователем полигона
+    private static final String PART_OF_POLYGON = "PART_OF_POLYGON";
 
     private static String FIGURE = NON;
 
     private Integer movingPointId, plogyPointsCount;
-    private float movingX, movingY, prevMovingX, prevMovingY, deltaX, deltaY;
+    private float movingX, movingY, prevMovingX, prevMovingY;
     private float movingDist;
 
     public CustomViewFigures(Context context) {
@@ -103,7 +104,7 @@ public class CustomViewFigures extends ImageView {
             case POLYGON:
                 drawFigure(canvas);
                 break;
-            case HALF_POLYGON:
+            case PART_OF_POLYGON:
                 drawPolyLine(canvas);
                 break;
         }
@@ -128,8 +129,8 @@ public class CustomViewFigures extends ImageView {
 
         int positionX = (int) event.getRawX();
         int positionY = (int) event.getRawY();
-        deltaX = positionX - prevMovingX;
-        deltaY = positionY - prevMovingY;
+        float deltaX = positionX - prevMovingX;
+        float deltaY = positionY - prevMovingY;
 
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN: {
@@ -137,6 +138,7 @@ public class CustomViewFigures extends ImageView {
                     for (FigurePoint point : pointList) {
                         deltaX = positionX - point.getX();
                         deltaY = positionY - point.getY();
+                        // TODO переделать механизим уточнения области касания экрана для точечного попадания в точку полигона
                         if (deltaX < 20 && (deltaX > -20 && deltaY > -20)) {
                             movingPointId = point.getId();
                             movingX = point.getX();
@@ -212,6 +214,9 @@ public class CustomViewFigures extends ImageView {
         return true;
     }
 
+    /**
+     * Отрисовка статических фигур
+     */
     private void drawFigure(Canvas canvas) {
         mPath = new Path();
         mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
@@ -230,6 +235,9 @@ public class CustomViewFigures extends ImageView {
         canvas.drawPath(mPath, mPathPaint);
     }
 
+    /**
+     * Отрисовка линии в режиме построения полигона
+     */
     private void drawPolyLine(Canvas canvas) {
         for (int i = 0; i < pointList.size(); i++) {
             canvas.drawCircle(pointList.get(i).getX(), pointList.get(i).getY(), 10, mPointsPaint);
@@ -240,6 +248,9 @@ public class CustomViewFigures extends ImageView {
         }
     }
 
+    /**
+     * Инициализация треугольника (статическая фигура)
+     */
     public void initTriangle() {
         FIGURE = STATIC;
 
@@ -251,6 +262,9 @@ public class CustomViewFigures extends ImageView {
         invalidate();
     }
 
+    /**
+     * Инициализация квадрата (статическая фигура)
+     */
     public void initSquare() {
         FIGURE = STATIC;
 
@@ -263,11 +277,17 @@ public class CustomViewFigures extends ImageView {
         invalidate();
     }
 
+    /**
+     * Инициализация круга (статическая фигура)
+     */
     public void initCircle() {
         FIGURE = CIRCLE;
         // TODO circle
     }
 
+    /**
+     * Инициализация полигона (динамическая фигура с возможностью сдвига точек)
+     */
     public void initPolygon(boolean draw) {
         if (draw) {
             FIGURE = POLYGON;
@@ -276,7 +296,7 @@ public class CustomViewFigures extends ImageView {
             clearBitmap();
             invalidate();
         } else {
-            FIGURE = HALF_POLYGON;
+            FIGURE = PART_OF_POLYGON;
             pointList = new ArrayList<>();
             plogyPointsCount = 0;
             ACTION = POLYGON_DRAWING;
@@ -285,6 +305,9 @@ public class CustomViewFigures extends ImageView {
         }
     }
 
+    /**
+     * Метод вырезания из канвы области в виде Path
+     */
     public void clipArea() {
         if (mPath == null) {
             return;
@@ -312,12 +335,18 @@ public class CustomViewFigures extends ImageView {
         clearFigure();
     }
 
+    /**
+     * Убираем фигуру с экрана
+     */
     private void clearFigure() {
         pointList = null;
         mPath = null;
         invalidate();
     }
 
+    /**
+     * Убираем все с экрана, очищаем изображение
+     */
     private void clearBitmap() {
         mBitmap = srcBitmap;
         invalidate();
