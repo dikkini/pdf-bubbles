@@ -34,7 +34,7 @@ public class CustomViewFigures extends ImageView {
     private Paint mPathPaint;
     private Paint mPointsPaint;
     private Path mPath;
-    private List<FigurePoint> pointList;
+    private List<FigurePoint> pointList = new ArrayList<>();
 
     private float mX, mY;
     private static final float TOUCH_TOLERANCE = 4;
@@ -46,6 +46,7 @@ public class CustomViewFigures extends ImageView {
     private static final int POLYGON_DRAWING = 2;
     private static final int MOVING_STATIC_FIGURE = 3;
     private static final int RESIZING_FIGURE = 4;
+    private static final int MOVING_CIRCLE = 5;
 
     private static int ACTION = NONE;
 
@@ -62,6 +63,7 @@ public class CustomViewFigures extends ImageView {
     private Integer movingPointId, plogyPointsCount;
     private float movingX, movingY, prevMovingX, prevMovingY;
     private float movingDist;
+    private FigurePoint circlePoint;
 
     public CustomViewFigures(Context context) {
         super(context);
@@ -90,14 +92,11 @@ public class CustomViewFigures extends ImageView {
         super(context, attrs, defStyle);
     }
 
+    // TODO продумать ситуации с pointsList
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawBitmap(mBitmap, 0, 0, mBitmapPaint);
-
-        if (pointList == null || pointList.isEmpty()) {
-            return;
-        }
 
         switch (FIGURE) {
             case STATIC:
@@ -106,6 +105,9 @@ public class CustomViewFigures extends ImageView {
                 break;
             case PART_OF_POLYGON:
                 drawPolyLine(canvas);
+                break;
+            case CIRCLE:
+                drawCircle(canvas);
                 break;
         }
     }
@@ -121,10 +123,6 @@ public class CustomViewFigures extends ImageView {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        if (pointList == null) {
-            return false;
-        }
-
         // TODO ограничить выезд за границы экрана
 
         int positionX = (int) event.getRawX();
@@ -147,6 +145,8 @@ public class CustomViewFigures extends ImageView {
                     }
                 } else if (FIGURE.equals(STATIC)) {
                     ACTION = MOVING_STATIC_FIGURE;
+                } else if (FIGURE.equals(CIRCLE)) {
+                    ACTION = MOVING_CIRCLE;
                 }
 
                 prevMovingX = positionX;
@@ -190,6 +190,11 @@ public class CustomViewFigures extends ImageView {
                         }
                         invalidate();
                     }
+                } else if (ACTION == MOVING_CIRCLE) {
+                    circlePoint.setX(positionX);
+                    circlePoint.setY(positionY);
+
+                    invalidate();
                 }
                 break;
             }
@@ -215,14 +220,12 @@ public class CustomViewFigures extends ImageView {
     }
 
     /**
-     * Отрисовка статических фигур
+     * Отрисовка фигуры
      */
     private void drawFigure(Canvas canvas) {
         mPath = new Path();
         mPath.moveTo(pointList.get(0).getX(), pointList.get(0).getY());
         for (FigurePoint point : pointList) {
-            mPath.lineTo(point.getX(), point.getY());
-            mPath.lineTo(point.getX(), point.getY());
             mPath.lineTo(point.getX(), point.getY());
 
             // draw points of changing polygon
@@ -246,6 +249,13 @@ public class CustomViewFigures extends ImageView {
                         pointList.get(i+1).getX(), pointList.get(i+1).getY(), mPathPaint);
             }
         }
+    }
+
+    /**
+     * Отрисовка окружности
+     */
+    private void drawCircle(Canvas canvas) {
+        canvas.drawCircle(circlePoint.getX(), circlePoint.getY(), 100, mPathPaint);
     }
 
     /**
@@ -282,7 +292,9 @@ public class CustomViewFigures extends ImageView {
      */
     public void initCircle() {
         FIGURE = CIRCLE;
-        // TODO circle
+
+        circlePoint = new FigurePoint(300, 300);
+        invalidate();
     }
 
     /**
@@ -309,9 +321,6 @@ public class CustomViewFigures extends ImageView {
      * Метод вырезания из канвы области в виде Path
      */
     public void clipArea() {
-        if (mPath == null) {
-            return;
-        }
         Bitmap output = Bitmap.createBitmap(mBitmap.getWidth(), mBitmap.getHeight(),
                 Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(output);
@@ -321,11 +330,13 @@ public class CustomViewFigures extends ImageView {
         paint.setStyle(Paint.Style.FILL);
         paint.setAntiAlias(true);
 
-        Paint p = new Paint();
-        p.setColor(Color.BLACK);
-
-        canvas.drawPaint(p);
-        canvas.clipPath(mPath);
+        if (FIGURE.equals(CIRCLE)) {
+            canvas.drawARGB(0, 0, 0, 0);
+            canvas.drawCircle(circlePoint.getX(), circlePoint.getY(), 100, paint);
+        } else {
+            canvas.drawColor(Color.BLACK);
+            canvas.clipPath(mPath);
+        }
 
         // change the parameters accordin to your needs.
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
@@ -341,6 +352,9 @@ public class CustomViewFigures extends ImageView {
     private void clearFigure() {
         pointList = null;
         mPath = null;
+        circlePoint = null;
+        FIGURE = NON;
+        ACTION = NONE;
         invalidate();
     }
 
@@ -348,6 +362,8 @@ public class CustomViewFigures extends ImageView {
      * Убираем все с экрана, очищаем изображение
      */
     private void clearBitmap() {
+        FIGURE = NON;
+        ACTION = NONE;
         mBitmap = srcBitmap;
         invalidate();
     }
