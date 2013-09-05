@@ -38,7 +38,7 @@ public class CustomViewFigures extends ImageView {
 
     private float mX, mY;
     private static final float TOUCH_TOLERANCE = 4;
-    private final static float stdDist = 10f;
+    private final static float stdDist = 2f;
 
     // режимы дейстий
     private static final int NONE = 0;
@@ -64,6 +64,7 @@ public class CustomViewFigures extends ImageView {
     private float movingX, movingY, prevMovingX, prevMovingY;
     private float movingDist;
     private FigurePoint circlePoint;
+    private int circleRadius = 100, minimalRadius = 10;
 
     public CustomViewFigures(Context context) {
         super(context);
@@ -181,13 +182,26 @@ public class CustomViewFigures extends ImageView {
                     }
 
                     invalidate();
-                } else if (ACTION == RESIZING_FIGURE) {
+                } else if (ACTION == RESIZING_FIGURE && FIGURE.equals(STATIC)) {
                     float newMovingDist = spacing(event);
                     if (newMovingDist > stdDist) {
                         for (FigurePoint point : pointList) {
                             point.setX((int) (newMovingDist / movingDist * point.getX()));
                             point.setY((int) (newMovingDist / movingDist * point.getY()));
                         }
+                        invalidate();
+                    }
+                } else if (ACTION == RESIZING_FIGURE && FIGURE.equals(CIRCLE)) {
+                    float newMovingDist = spacing(event);
+                    if (newMovingDist > stdDist) {
+                        int nRadius = (int) (newMovingDist / movingDist * circleRadius);
+                        if (nRadius == 0) {
+                            nRadius = minimalRadius;
+                        // TODO вычислять максимальный размер исходя из размеров экрана
+                        } else if (nRadius > 600) {
+                            nRadius = 600;
+                        }
+                        circleRadius = nRadius;
                         invalidate();
                     }
                 } else if (ACTION == MOVING_CIRCLE) {
@@ -255,7 +269,7 @@ public class CustomViewFigures extends ImageView {
      * Отрисовка окружности
      */
     private void drawCircle(Canvas canvas) {
-        canvas.drawCircle(circlePoint.getX(), circlePoint.getY(), 100, mPathPaint);
+        canvas.drawCircle(circlePoint.getX(), circlePoint.getY(), circleRadius, mPathPaint);
     }
 
     /**
@@ -332,7 +346,7 @@ public class CustomViewFigures extends ImageView {
 
         if (FIGURE.equals(CIRCLE)) {
             canvas.drawARGB(0, 0, 0, 0);
-            canvas.drawCircle(circlePoint.getX(), circlePoint.getY(), 100, paint);
+            canvas.drawCircle(circlePoint.getX(), circlePoint.getY(), circleRadius, paint);
         } else {
             canvas.drawColor(Color.BLACK);
             canvas.clipPath(mPath);
