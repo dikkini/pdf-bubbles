@@ -49,8 +49,9 @@ public class CustomViewFigures extends ImageView {
     private static final int POLYGON_POINT_MOVING = 1;
     private static final int POLYGON_DRAWING = 2;
     private static final int MOVING_STATIC_FIGURE = 3;
-    private static final int RESIZING_FIGURE = 4;
-    private static final int MOVING_CIRCLE = 5;
+    private static final int MOVING_STATIC_POINT = 4;
+    private static final int RESIZING_FIGURE = 5;
+    private static final int MOVING_CIRCLE = 6;
 
     private static int ACTION = NONE;
 
@@ -107,7 +108,6 @@ public class CustomViewFigures extends ImageView {
         super(context, attrs, defStyle);
     }
 
-    // TODO продумать ситуации с pointsList
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -157,6 +157,18 @@ public class CustomViewFigures extends ImageView {
                             movingY = point.getY();
                         }
                     }
+                } else if (FIGURE.equals(STATIC) && ACTION == MOVING_STATIC_POINT) {
+                    for (FigurePoint point : pointList) {
+                        deltaX = positionX - point.getX();
+                        deltaY = positionY - point.getY();
+                        // TODO переделать механизим уточнения области касания экрана для точечного попадания в точку полигона
+                        // TODO обнулять movingX,Y если ни одна точка не соответствует координатам
+                        if (deltaX < 20 && (deltaX > -20 && deltaY > -20)) {
+                            movingPointId = point.getId();
+                            movingX = point.getX();
+                            movingY = point.getY();
+                        }
+                    }
                 } else if (FIGURE.equals(STATIC)) {
                     ACTION = MOVING_STATIC_FIGURE;
                 } else if (FIGURE.equals(CIRCLE)) {
@@ -183,6 +195,16 @@ public class CustomViewFigures extends ImageView {
                     }
 
                     invalidate();
+                } else if (ACTION == MOVING_STATIC_POINT) {
+                    // TODO движение точки ресайзит пропорционально фигуру
+                    // получил новые координаты x и y
+                    for (FigurePoint point : pointList) {
+                        if (point.getId().equals(movingPointId)) {
+                            point.setX(movingX);
+                            point.setY(movingY);
+                        }
+                        // TODO обработать остальные точки для правильного перемещения фигуры
+                    }
                 } else if (ACTION == MOVING_STATIC_FIGURE) {
                     deltaX = positionX - prevMovingX;
                     deltaY = positionY - prevMovingY;
@@ -262,10 +284,7 @@ public class CustomViewFigures extends ImageView {
         for (FigurePoint point : pointList) {
             mPath.lineTo(point.getX(), point.getY());
 
-            // draw points of changing polygon
-            if (FIGURE.equals(POLYGON)) {
-                canvas.drawCircle(point.getX(), point.getY(), 10, mPointsPaint);
-            }
+            canvas.drawCircle(point.getX(), point.getY(), 20, mPointsPaint);
         }
         mPath.close();
 
