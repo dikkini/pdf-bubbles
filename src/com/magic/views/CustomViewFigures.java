@@ -10,9 +10,12 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.FloatMath;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -27,6 +30,7 @@ import java.util.List;
 public class CustomViewFigures extends ImageView {
 
     private static final String TAG = "CustomViewFigures";
+    private DisplayMetrics displayMetrics = new DisplayMetrics();
 
     private Bitmap mBitmap;
     private Bitmap srcBitmap;
@@ -38,7 +42,7 @@ public class CustomViewFigures extends ImageView {
 
     private float mX, mY;
     private static final float TOUCH_TOLERANCE = 4;
-    private final static float stdDist = 2f;
+    private final static float stdDist = 10f;
 
     // режимы дейстий
     private static final int NONE = 0;
@@ -65,6 +69,9 @@ public class CustomViewFigures extends ImageView {
     private float movingDist;
     private FigurePoint circlePoint;
     private int circleRadius = 100, minimalRadius = 10;
+    private int minimumX = 0, minimumY = 600;
+    private int scaleCircle = 1;
+    private int displayWidth, displayHeigth;
 
     public CustomViewFigures(Context context) {
         super(context);
@@ -87,6 +94,13 @@ public class CustomViewFigures extends ImageView {
         mPathPaint.setColor(Color.RED);
         mPathPaint.setStyle(Paint.Style.STROKE);
         mPathPaint.setStrokeWidth(8);
+
+        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        display.getMetrics(displayMetrics);
+        scaleCircle = displayMetrics.densityDpi;
+        displayWidth = display.getWidth();
+        displayHeigth = display.getHeight();
     }
 
     public CustomViewFigures(Context context, AttributeSet attrs, int defStyle) {
@@ -117,7 +131,6 @@ public class CustomViewFigures extends ImageView {
     public void setImageBitmap(Bitmap bm) {
         srcBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
         mBitmap = bm.copy(Bitmap.Config.ARGB_8888, true);
-        clearFigure();
 
         invalidate();
     }
@@ -194,14 +207,21 @@ public class CustomViewFigures extends ImageView {
                 } else if (ACTION == RESIZING_FIGURE && FIGURE.equals(CIRCLE)) {
                     float newMovingDist = spacing(event);
                     if (newMovingDist > stdDist) {
-                        int nRadius = (int) (newMovingDist / movingDist * circleRadius);
-                        if (nRadius == 0) {
+                        float scale = (newMovingDist / movingDist);
+                        if (scale > 1) {
+                            scale = 1.1f;
+                        } else if (scale < 1) {
+                            scale = 0.95f;
+                        }
+
+                        float nRadius = circleRadius * scale;
+                        if (nRadius < minimalRadius) {
                             nRadius = minimalRadius;
                         // TODO вычислять максимальный размер исходя из размеров экрана
                         } else if (nRadius > 600) {
                             nRadius = 600;
                         }
-                        circleRadius = nRadius;
+                        circleRadius = (int) nRadius;
                         invalidate();
                     }
                 } else if (ACTION == MOVING_CIRCLE) {
@@ -367,6 +387,8 @@ public class CustomViewFigures extends ImageView {
         pointList = null;
         mPath = null;
         circlePoint = null;
+        // reset circle radius to minimal radius value
+        circleRadius = minimalRadius;
         FIGURE = NON;
         ACTION = NONE;
         invalidate();
@@ -376,8 +398,6 @@ public class CustomViewFigures extends ImageView {
      * Убираем все с экрана, очищаем изображение
      */
     private void clearBitmap() {
-        FIGURE = NON;
-        ACTION = NONE;
         mBitmap = srcBitmap;
         invalidate();
     }
@@ -390,7 +410,7 @@ public class CustomViewFigures extends ImageView {
             y = event.getY(0) - event.getY(1);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
-            Log.d("spacing", "pointerIndex exception");
+            Log.d(TAG, "pointerIndex exception");
         }
         return FloatMath.sqrt(x * x + y * y);
     }
