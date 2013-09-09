@@ -29,7 +29,7 @@ public class DrawingActivity extends Activity {
         Button drawTracery = (Button) findViewById(R.id.drawing_draw_tracery);
         Button cutBtn = (Button) findViewById(R.id.drawing_cut_photo);
 
-        String imgPath = "/storage/sdcard0/Pictures/Instagram/IMG_20130629_145630.jpg";
+        String imgPath = "/storage/emulated/0/DCIM/Camera/IMG_20130629_145351.jpg";
         File file = new File(imgPath);
         Bitmap bitmap = BitmapUtils.decodeFile(file, 1024, 1024, false);
 

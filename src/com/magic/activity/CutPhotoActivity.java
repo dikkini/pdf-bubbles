@@ -34,7 +34,7 @@ public class CutPhotoActivity extends Activity {
 
         customImageView = (CustomImageView) findViewById(R.id.cut_photo_imageview);
 
-        String imgPath = "/storage/sdcard0/Pictures/Instagram/IMG_20130629_145630.jpg";
+        String imgPath = "/storage/emulated/0/DCIM/Camera/IMG_20130629_145351.jpg";
         File file = new File(imgPath);
         Bitmap bitmap = BitmapUtils.decodeFile(file, 1024, 1024, false);
 

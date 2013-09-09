@@ -206,7 +206,7 @@ public class BubbleActivity extends Activity {
             }
         });
 
-        String photoPath = "/storage/sdcard0/Pictures/Instagram/IMG_20130629_145630.jpg";
+        String photoPath = "/storage/emulated/0/DCIM/Camera/IMG_20130629_145351.jpg";
         setPhoto(photoPath);
     }
 
