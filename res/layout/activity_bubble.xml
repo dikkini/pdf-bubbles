@@ -108,6 +108,27 @@
                     android:id="@+id/bubbleview_set_bubble_view2_button"
                     android:singleLine="true"/>
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble3"
+                android:id="@+id/bubbleview_set_bubble_view3_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble4"
+                android:id="@+id/bubbleview_set_bubble_view4_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble5"
+                android:id="@+id/bubbleview_set_bubble_view5_button"
+                android:singleLine="true"/>
+
         </LinearLayout>
     </HorizontalScrollView>
 
