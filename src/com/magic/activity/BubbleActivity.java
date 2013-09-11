@@ -76,6 +76,20 @@ public class BubbleActivity extends Activity {
         Button draw3Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view3_button);
         Button draw4Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view4_button);
         Button draw5Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view5_button);
+        Button draw6Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view6_button);
+        Button draw7Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view7_button);
+        Button draw8Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view8_button);
+        Button draw9Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view9_button);
+        Button draw10Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view10_button);
+        Button draw11Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view11_button);
+        Button draw12Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view12_button);
+        Button draw13Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view13_button);
+        Button draw14Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view14_button);
+        Button draw15Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view15_button);
+        Button draw16Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view16_button);
+        Button draw17Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view17_button);
+        Button draw18Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view18_button);
+        Button draw19Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view19_button);
         Button textSizeBtn = (Button) findViewById(R.id.bubbleview_set_text_font_button);
         Button textFontBtn = (Button) findViewById(R.id.bubbleview_set_text_size_button);
 
@@ -123,7 +137,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.heart);
+                activeBubble.setBubbleDrawable(R.drawable.rectheart);
             }
         });
 
@@ -172,6 +186,174 @@ public class BubbleActivity extends Activity {
                 }
                 activeBubble = activeBubble.getActiveBubble();
                 activeBubble.setBubbleDrawable(R.drawable.cloud12);
+            }
+        });
+
+        draw6Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.speech_bubble);
+            }
+        });
+
+        draw7Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.custom_info_bubble);
+            }
+        });
+
+        draw8Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.arrow11);
+            }
+        });
+
+        draw9Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.baloon12);
+            }
+        });
+
+        draw10Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.baloon13);
+            }
+        });
+
+        draw11Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.bottle11);
+            }
+        });
+
+        draw12Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.cardsclub);
+            }
+        });
+
+        draw13Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.cardsdiamond);
+            }
+        });
+
+        draw14Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.cardsheart);
+            }
+        });
+
+        draw15Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.cardsspades);
+            }
+        });
+
+        draw16Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.elipsheart);
+            }
+        });
+
+        draw17Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.elipsthunder);
+            }
+        });
+
+        draw18Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.ghost);
+            }
+        });
+
+        draw19Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleDrawable(R.drawable.ghost12);
             }
         });
 
@@ -237,7 +419,7 @@ public class BubbleActivity extends Activity {
                 bubble.setLayoutParams(params);
                 mainRelativeLayout.addView(bubble, bubbleId);
                 bubble.bringToFront();
-                bubble.setBubbleDrawable(R.drawable.heart);
+                bubble.setBubbleDrawable(R.drawable.custom_info_bubble);
                 bubble.setAnimation(animFadeIn);
 
                 seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubble));
