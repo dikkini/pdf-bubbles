@@ -74,6 +74,9 @@ public class CustomViewFigures extends ImageView {
     private int scaleCircle = 1;
     private int displayWidth, displayHeigth;
 
+    private float xBase;
+    private float yBase;
+
     public CustomViewFigures(Context context) {
         super(context);
     }
@@ -157,18 +160,6 @@ public class CustomViewFigures extends ImageView {
                             movingY = point.getY();
                         }
                     }
-                } else if (FIGURE.equals(STATIC) && ACTION == MOVING_STATIC_POINT) {
-                    for (FigurePoint point : pointList) {
-                        deltaX = positionX - point.getX();
-                        deltaY = positionY - point.getY();
-                        // TODO переделать механизим уточнения области касания экрана для точечного попадания в точку полигона
-                        // TODO обнулять movingX,Y если ни одна точка не соответствует координатам
-                        if (deltaX < 20 && (deltaX > -20 && deltaY > -20)) {
-                            movingPointId = point.getId();
-                            movingX = point.getX();
-                            movingY = point.getY();
-                        }
-                    }
                 } else if (FIGURE.equals(STATIC)) {
                     ACTION = MOVING_STATIC_FIGURE;
                 } else if (FIGURE.equals(CIRCLE)) {
@@ -195,16 +186,6 @@ public class CustomViewFigures extends ImageView {
                     }
 
                     invalidate();
-                } else if (ACTION == MOVING_STATIC_POINT) {
-                    // TODO движение точки ресайзит пропорционально фигуру
-                    // получил новые координаты x и y
-                    for (FigurePoint point : pointList) {
-                        if (point.getId().equals(movingPointId)) {
-                            point.setX(movingX);
-                            point.setY(movingY);
-                        }
-                        // TODO обработать остальные точки для правильного перемещения фигуры
-                    }
                 } else if (ACTION == MOVING_STATIC_FIGURE) {
                     deltaX = positionX - prevMovingX;
                     deltaY = positionY - prevMovingY;
@@ -221,8 +202,18 @@ public class CustomViewFigures extends ImageView {
                     float newMovingDist = spacing(event);
                     if (newMovingDist > stdDist) {
                         for (FigurePoint point : pointList) {
-                            point.setX((int) (newMovingDist / movingDist * point.getX()));
-                            point.setY((int) (newMovingDist / movingDist * point.getY()));
+                            float scale = (newMovingDist / movingDist);
+                            if (scale > 1) {
+                                scale = 1.037f;
+                            } else if (scale < 1) {
+                                scale = 0.98f;
+                            }
+
+                            int nX = (int) (pointList.get(0).getX() + (point.getX() - pointList.get(0).getX()) * scale);
+                            int nY = (int) (pointList.get(0).getY() + (point.getY() - pointList.get(0).getY()) * scale);
+
+                            point.setX(nX);
+                            point.setY(nY);
                         }
                         invalidate();
                     }
@@ -231,11 +222,11 @@ public class CustomViewFigures extends ImageView {
                     if (newMovingDist > stdDist) {
                         float scale = (newMovingDist / movingDist);
                         if (scale > 1) {
-                            scale = 1.1f;
+                            scale = 1.037f;
                         } else if (scale < 1) {
-                            scale = 0.95f;
+                            scale = 0.98f;
                         }
-
+                        
                         float nRadius = circleRadius * scale;
                         if (nRadius < minimalRadius) {
                             nRadius = minimalRadius;
