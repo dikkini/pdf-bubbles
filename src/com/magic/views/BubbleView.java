@@ -411,9 +411,102 @@ public final class BubbleView extends ImageView {
                     mathLine = mScaledImageHeight / 100;
                     maxLines = mathLine;
                     break;
+                // TODO продумать расположение текста
+                case R.drawable.rectheart:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+                case R.drawable.thunder:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+                case R.drawable.baloon11:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+                case R.drawable.cloud11:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+                case R.drawable.cloud12:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.arrow11:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.baloon12:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.baloon13:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.cardsclub:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.cardsdiamond:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.bottle11:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.elipsheart:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.elipsthunder:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.ghost:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.ghost12:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
+
+                case R.drawable.cardsheart:
+                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
+                    mathLine = mScaledImageHeight / 100;
+                    maxLines = mathLine;
+                    break;
                 default:
                     maxLines = 1;
                     break;
+
             }
 
             textView.setMaxLines(maxLines);

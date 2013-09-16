@@ -108,6 +108,125 @@
                     android:id="@+id/bubbleview_set_bubble_view2_button"
                     android:singleLine="true"/>
 
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble3"
+                android:id="@+id/bubbleview_set_bubble_view3_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble4"
+                android:id="@+id/bubbleview_set_bubble_view4_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble5"
+                android:id="@+id/bubbleview_set_bubble_view5_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble6"
+                android:id="@+id/bubbleview_set_bubble_view6_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble7"
+                android:id="@+id/bubbleview_set_bubble_view7_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble8"
+                android:id="@+id/bubbleview_set_bubble_view8_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble9"
+                android:id="@+id/bubbleview_set_bubble_view9_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble10"
+                android:id="@+id/bubbleview_set_bubble_view10_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble11"
+                android:id="@+id/bubbleview_set_bubble_view11_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble12"
+                android:id="@+id/bubbleview_set_bubble_view12_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble13"
+                android:id="@+id/bubbleview_set_bubble_view13_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble14"
+                android:id="@+id/bubbleview_set_bubble_view14_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble15"
+                android:id="@+id/bubbleview_set_bubble_view15_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble16"
+                android:id="@+id/bubbleview_set_bubble_view16_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble17"
+                android:id="@+id/bubbleview_set_bubble_view17_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble18"
+                android:id="@+id/bubbleview_set_bubble_view18_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bubble19"
+                android:id="@+id/bubbleview_set_bubble_view19_button"
+                android:singleLine="true"/>
+
         </LinearLayout>
     </HorizontalScrollView>
 
