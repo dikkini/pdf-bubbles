@@ -367,7 +367,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleSVG(R.raw.android);
+                activeBubble.setBubbleSVG(R.raw.svg);
             }
         });
 

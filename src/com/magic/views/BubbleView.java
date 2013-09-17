@@ -285,7 +285,7 @@ public final class BubbleView extends ImageView {
     }
 
     public void setBubbleSVG(int drawableId) {
-        SVG svg = SVGParser.getSVGFromResource(getResources(), R.raw.android);
+        SVG svg = SVGParser.getSVGFromResource(getResources(), drawableId);
         PictureDrawable pic = svg.createPictureDrawable();
         Bitmap bm = Bitmap.createBitmap(pic.getIntrinsicWidth(), pic.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bm);
