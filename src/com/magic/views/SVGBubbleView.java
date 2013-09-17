@@ -5,13 +5,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.drawable.PictureDrawable;
 import android.util.AttributeSet;
 import android.view.Display;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
-import com.caverock.androidsvg.SVG;
-import com.caverock.androidsvg.SVGParseException;
+import com.larvalabs.svgandroid.SVG;
+import com.larvalabs.svgandroid.SVGParser;
 import com.magic.R;
 import com.magic.activity.SVGActivity;
 
@@ -39,17 +40,8 @@ public class SVGBubbleView extends ImageView {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        try {
-            svg = SVG.getFromResource(getContext(), R.raw.acid1_embedcss);
-            Set<String> viewList = svg.getViewList();
-            for (String view : viewList) {
-                System.out.println(view);
-            }
-
-        } catch (SVGParseException e) {
-            e.printStackTrace();
-        }
-
+        svg = SVGParser.getSVGFromResource(getResources(), R.raw.acid1_embedcss);
+        PictureDrawable pictureDrawable = svg.createPictureDrawable();
     }
 
     public void buildSVGImage(SVG svg) {

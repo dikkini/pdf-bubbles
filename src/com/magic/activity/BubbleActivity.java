@@ -70,6 +70,7 @@ public class BubbleActivity extends Activity {
 
         Button blinkAnimBtn = (Button) findViewById(R.id.bubbleview_blink_animation_button);
         Button addNewBubbleBtn = (Button) findViewById(R.id.bubbleview_add_new_bubble_button);
+        Button removeBubbleBtn = (Button) findViewById(R.id.bubbleview_remove_bubble_button);
         Button setTextBtn = (Button) findViewById(R.id.bubbleview_set_text_button);
         Button draw1Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view1_button);
         Button draw2Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view2_button);
@@ -90,6 +91,7 @@ public class BubbleActivity extends Activity {
         Button draw17Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view17_button);
         Button draw18Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view18_button);
         Button draw19Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view19_button);
+        Button draw20Btn = (Button) findViewById(R.id.bubbleview_set_bubble_view20_button);
         Button textSizeBtn = (Button) findViewById(R.id.bubbleview_set_text_font_button);
         Button textFontBtn = (Button) findViewById(R.id.bubbleview_set_text_size_button);
 
@@ -357,6 +359,19 @@ public class BubbleActivity extends Activity {
             }
         });
 
+        draw20Btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                activeBubble.setBubbleSVG(R.raw.android);
+            }
+        });
+
+
         setTextBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -404,14 +419,14 @@ public class BubbleActivity extends Activity {
                 if (activeBubble != null) {
                     bubbles = activeBubble.getBubbles();
                 }
-                bubbleId = bubbleId + 1;
+                bubbleId = bubbles.size() + 1;
                 BubbleView bubble = activeBubble = new BubbleView(BubbleActivity.this, imageView,
                         bubbleId, bubbles, mainRelativeLayout, seekColor, seekAlpha);
 
                 bubble.drawStroke();
                 bubbles.add(bubble);
 
-                bubble.showActiveBubble(activeBubble);
+                bubble.showActiveBubble(activeBubble.getBubbleId());
 
                 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) imageView.
                         getLayoutParams();
@@ -424,6 +439,38 @@ public class BubbleActivity extends Activity {
 
                 seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubble));
                 seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(bubble));
+            }
+        });
+
+        removeBubbleBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (activeBubble == null) {
+                    Toast.makeText(BubbleActivity.this, "Add some bubbles before", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                activeBubble = activeBubble.getActiveBubble();
+                Integer bubbleId = activeBubble.getBubbleId();
+
+                // удаляем из списка баблов бабал
+                bubbles = activeBubble.getBubbles();
+                int index = bubbles.indexOf(activeBubble);
+                bubbles.remove(activeBubble);
+                if (bubbles.size() == 0) {
+                    activeBubble = null;
+                } else {
+                    int nextIndex;
+                    if (index == 0) {
+                        nextIndex = ++index;
+                    } else {
+                        nextIndex = --index;
+                    }
+                    activeBubble = bubbles.get(nextIndex);
+                    activeBubble.showActiveBubble(activeBubble.getBubbleId());
+                }
+                // удаляем view бабла
+                mainRelativeLayout.removeViewAt(bubbleId);
+                mainRelativeLayout.invalidate();
             }
         });
 

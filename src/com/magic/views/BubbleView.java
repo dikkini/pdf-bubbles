@@ -10,8 +10,11 @@ import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Picture;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.drawable.PictureDrawable;
 import android.text.TextUtils;
 import android.util.FloatMath;
 import android.util.Log;
@@ -22,6 +25,8 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.larvalabs.svgandroid.SVG;
+import com.larvalabs.svgandroid.SVGParser;
 import com.magic.R;
 import com.magic.activity.BubbleSetAlphaSeekListener;
 import com.magic.activity.BubbleSetColorSeekListener;
@@ -201,8 +206,8 @@ public final class BubbleView extends ImageView {
                         int deltaX = positionX - prevX;
                         int deltaY = positionY - prevY;
                         // Check if delta is added, is the rectangle is within the visible screen
-                        if ((mImagePosition.left + deltaX) > 0 && ((mImagePosition.right + deltaX) < mScreenWidth) &&
-                                (mImagePosition.top + deltaY) > 0 && ((mImagePosition.bottom + deltaY) < mScreenHeight)) {
+                        if ((mImagePosition.left + deltaX) > 0 &&
+                                (mImagePosition.top + deltaY) > 0) {
                             // invalidate current position as we are moving...
                             mImagePosition.left = mImagePosition.left + deltaX;
                             mImagePosition.top = mImagePosition.top + deltaY;
@@ -254,7 +259,7 @@ public final class BubbleView extends ImageView {
                                 seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(focusedBubble));
 
                                 focusedBubble.drawStroke();
-                                showActiveBubble(focusedBubble);
+                                showActiveBubble(focusedBubble.getBubbleId());
                                 return false;
                             }
                         }
@@ -277,6 +282,17 @@ public final class BubbleView extends ImageView {
         scaleImage();
         textView.postInvalidate();
         postInvalidate();
+    }
+
+    public void setBubbleSVG(int drawableId) {
+        SVG svg = SVGParser.getSVGFromResource(getResources(), R.raw.android);
+        PictureDrawable pic = svg.createPictureDrawable();
+        Bitmap bm = Bitmap.createBitmap(pic.getIntrinsicWidth(), pic.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bm);
+        canvas.drawPicture(pic.getPicture());
+        image = bm;
+
+        invalidate();
     }
 
     public void setBubbleDrawable(int drawableId) {
@@ -519,9 +535,9 @@ public final class BubbleView extends ImageView {
     }
 
     // удаляем обводку у всех баблов кроме того который в фокусе
-    public void showActiveBubble(BubbleView activeBubble) {
+    public void showActiveBubble(Integer bubbleId) {
         for (BubbleView bubble : bubbles) {
-            if (!bubble.getBubbleId().equals(activeBubble.getBubbleId())) {
+            if (!bubble.getBubbleId().equals(bubbleId)) {
                 bubble.removeStroke();
             }
         }

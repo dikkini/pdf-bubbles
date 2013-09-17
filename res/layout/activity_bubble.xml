@@ -68,31 +68,37 @@
             <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Blink Animation"
-                    android:id="@+id/bubbleview_blink_animation_button"/>
-
-            <Button
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     android:text="Add new bubble"
                     android:id="@+id/bubbleview_add_new_bubble_button"/>
 
             <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Remove Active Bubble"
+                android:id="@+id/bubbleview_remove_bubble_button"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Blink Animation"
+                android:id="@+id/bubbleview_blink_animation_button"/>
+
+            <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SetText"
+                    android:text="Set Text"
                     android:id="@+id/bubbleview_set_text_button"/>
 
             <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SetText"
+                    android:text="Bold Text"
                     android:id="@+id/bubbleview_set_text_font_button"/>
 
             <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SetText"
+                    android:text="ChangeTextSize"
                     android:id="@+id/bubbleview_set_text_size_button"/>
 
             <Button
@@ -225,6 +231,13 @@
                 android:layout_height="wrap_content"
                 android:text="Bubble19"
                 android:id="@+id/bubbleview_set_bubble_view19_button"
+                android:singleLine="true"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BubbleSVG"
+                android:id="@+id/bubbleview_set_bubble_view20_button"
                 android:singleLine="true"/>
 
         </LinearLayout>
