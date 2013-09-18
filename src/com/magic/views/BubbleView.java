@@ -279,14 +279,22 @@ public final class BubbleView extends ImageView {
         Canvas canvas = new Canvas(bm);
         canvas.drawPicture(pic.getPicture());
         image = bm;
-        mImageHeight = image.getHeight();
-        mImageWidth = image.getWidth();
-        mImagePosition.right = bm.getWidth();
-        mImagePosition.bottom = bm.getHeight();
-        mImageRegion.set(mImagePosition);
 
-        scaleImage();
-        updateTextView();
+        if (mImagePosition == null) {
+            // начальные координаты изображения
+            int startYPosition = 10;
+            int startXPosition = 10;
+            mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
+            mImageRegion = new Region();
+        } else {
+            mImagePosition.right = mImageWidth;
+            mImagePosition.bottom = mImageHeight;
+            mScaledImageHeight = mImageHeight;
+            mScaledImageWidth = mImageWidth;
+            updateTextView();
+            scaleImage();
+        }
+
         invalidate();
     }
 

@@ -8,6 +8,7 @@ import android.graphics.RectF;
 import android.graphics.drawable.PictureDrawable;
 import android.util.AttributeSet;
 import android.view.Display;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
@@ -40,13 +41,16 @@ public class SVGBubbleView extends ImageView {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        svg = SVGParser.getSVGFromResource(getResources(), R.raw.acid1_embedcss);
+        svg = SVGParser.getSVGFromResource(getResources(), R.raw.outline);
         PictureDrawable pictureDrawable = svg.createPictureDrawable();
+        canvas.drawColor(Color.BLACK);
+        pictureDrawable.draw(canvas);
     }
 
-    public void buildSVGImage(SVG svg) {
-        this.svg = svg;
-
-        invalidate();
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int positionX = (int) event.getRawX();
+        int positionY = (int) event.getRawY();
+        return false;
     }
 }
