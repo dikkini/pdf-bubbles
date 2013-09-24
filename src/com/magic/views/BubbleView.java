@@ -55,6 +55,7 @@ public final class BubbleView extends ImageView {
     private Paint tailPaint = new Paint();
 
     private Bitmap image;
+    private Bitmap sourceImage;
     private Context mContext;
     private int mScreenHeight, mScreenWidth, prevY, prevX, mImageWidth, mImageHeight, mTouchSlop,
             mScaledImageWidth, mScaledImageHeight, prevTailX, prevTailY;
@@ -302,6 +303,7 @@ public final class BubbleView extends ImageView {
         this.drawableId = drawableId;
         options = new BitmapFactory.Options();
         image = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
+        sourceImage = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
         mImageHeight = image.getHeight();
         mImageWidth = image.getWidth();
         if (mImagePosition == null) {
@@ -471,8 +473,6 @@ public final class BubbleView extends ImageView {
 //        this.image = BitmapFactory.decodeStream(bs, null, options);
         changeImagePosition();
 
-        mImageRegion.setEmpty();
-        mImageRegion.set(mImagePosition);
         updateTextView();
         invalidate();
     }

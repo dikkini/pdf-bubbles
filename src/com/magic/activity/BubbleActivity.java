@@ -434,7 +434,7 @@ public class BubbleActivity extends Activity {
                 bubble.setLayoutParams(params);
                 mainRelativeLayout.addView(bubble, bubbleId);
                 bubble.bringToFront();
-                bubble.setBubbleDrawable(R.drawable.custom_info_bubble);
+                bubble.setBubbleDrawable(R.drawable.cube);
                 bubble.setAnimation(animFadeIn);
 
                 seekAlpha.setOnSeekBarChangeListener(new BubbleSetAlphaSeekListener(bubble));
