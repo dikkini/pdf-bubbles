@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Picture;
@@ -113,9 +114,9 @@ public final class BubbleView extends ImageView {
         mScreenWidth = imageView.getWidth();
         canImageMove = false;
 
-        drawablePaint.setAntiAlias(true);
-        drawablePaint.setFilterBitmap(false);
-        drawablePaint.setDither(true);
+//        drawablePaint.setAntiAlias(true);
+//        drawablePaint.setFilterBitmap(false);
+//        drawablePaint.setDither(true);
 
         drawableRect.setEmpty();
 
@@ -280,6 +281,7 @@ public final class BubbleView extends ImageView {
         Canvas canvas = new Canvas(bm);
         canvas.drawPicture(pic.getPicture());
         image = bm;
+        sourceImage = bm;
 
         if (mImagePosition == null) {
             // начальные координаты изображения
@@ -302,6 +304,7 @@ public final class BubbleView extends ImageView {
     public void setBubbleDrawable(int drawableId) {
         this.drawableId = drawableId;
         options = new BitmapFactory.Options();
+        options.inScaled = false;
         image = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
         sourceImage = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
         mImageHeight = image.getHeight();

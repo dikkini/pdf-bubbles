@@ -175,7 +175,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.cloud11);
+                activeBubble.setBubbleSVG(R.raw.cloud11cef);
             }
         });
 
@@ -187,7 +187,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.cloud12);
+                activeBubble.setBubbleSVG(R.raw.cloud11outline);
             }
         });
 
@@ -199,7 +199,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.speech_bubble);
+                activeBubble.setBubbleSVG(R.raw.cloud11svg);
             }
         });
 
@@ -211,7 +211,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.custom_info_bubble);
+                activeBubble.setBubbleSVG(R.raw.rectheart01cef);
             }
         });
 
@@ -223,7 +223,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.arrow11);
+                activeBubble.setBubbleSVG(R.raw.rectheart01outline);
             }
         });
 
@@ -235,11 +235,11 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.baloon12);
+                activeBubble.setBubbleSVG(R.raw.rectheart01svg);
             }
         });
 
-        draw10Btn.setOnClickListener(new View.OnClickListener() {
+/*        draw10Btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (activeBubble == null) {
@@ -369,7 +369,7 @@ public class BubbleActivity extends Activity {
                 activeBubble = activeBubble.getActiveBubble();
                 activeBubble.setBubbleSVG(R.raw.svg);
             }
-        });
+        });*/
 
 
         setTextBtn.setOnClickListener(new View.OnClickListener() {

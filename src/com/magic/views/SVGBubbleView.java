@@ -1,11 +1,15 @@
 package com.magic.views;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Picture;
 import android.graphics.RectF;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PictureDrawable;
 import android.util.AttributeSet;
 import android.util.FloatMath;
@@ -18,6 +22,7 @@ import android.widget.ImageView;
 
 import com.larvalabs.svgandroid.SVG;
 import com.larvalabs.svgandroid.SVGParser;
+import com.magic.BitmapUtils;
 import com.magic.R;
 import com.magic.activity.SVGActivity;
 
@@ -44,6 +49,8 @@ public class SVGBubbleView extends ImageView {
 
     private ScaleGestureDetector mScaleDetector;
     private float mScaleFactor = 1.f;
+    private Drawable image = null;
+    private Picture pic = null;
 
     public SVGBubbleView(Context context) {
         super(context);
@@ -68,6 +75,12 @@ public class SVGBubbleView extends ImageView {
         super.onDraw(canvas);
         SVG svg = SVGParser.getSVGFromResource(mContext.getResources(), R.raw.acid1_embedcss);
         pic = svg.getPicture();
+        canvas.drawColor(Color.BLUE);
+        if (pic != null) {
+            canvas.drawPicture(pic);
+//            Bitmap bitmap = BitmapUtils.drawableToBitmap(image);
+//            canvas.drawBitmap(bitmap, 0, 0, new Paint());
+        }
     }
 
     @Override
@@ -121,5 +134,30 @@ public class SVGBubbleView extends ImageView {
             invalidate();
             return true;
         }
+    }
+
+    public void setSVG() {
+        //Get a Picture from the SVG
+        SVG vector = SVGParser.getSVGFromResource(getResources(), R.raw.rectheart01cef);
+
+        Picture test = vector.getPicture();
+        pic = test;
+
+        //Redraw the picture to a new size
+        Bitmap bitmap = Bitmap.createBitmap(test.getWidth(), test.getHeight(), Bitmap.Config.ARGB_8888);
+
+        Picture resizePicture = new Picture();
+
+        Canvas canvas = new Canvas(bitmap);
+        canvas = resizePicture.beginRecording(test.getWidth(), test.getHeight());
+
+        canvas.drawPicture(test, new Rect(0,0,test.getWidth(), test.getHeight()));
+
+        resizePicture.endRecording();
+
+        //get a drawable from resizePicture
+        image = new PictureDrawable(resizePicture);
+
+        invalidate();
     }
 }

@@ -24,5 +24,14 @@ public class SVGActivity extends Activity {
         setContentView(R.layout.activity_svgbubbles);
 
         customImageView = (SVGBubbleView) findViewById(R.id.svg_imageview);
+
+        Button formImage = (Button) findViewById(R.id.svg_create_button);
+
+        formImage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                customImageView.setSVG();
+            }
+        });
     }
 }
