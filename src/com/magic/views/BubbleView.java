@@ -305,8 +305,10 @@ public final class BubbleView extends ImageView {
         this.drawableId = drawableId;
         options = new BitmapFactory.Options();
         options.inScaled = false;
+        if (image != null) {
+            image.recycle();
+        }
         image = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
-        sourceImage = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
         mImageHeight = image.getHeight();
         mImageWidth = image.getWidth();
         if (mImagePosition == null) {

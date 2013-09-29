@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Picture;
+import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -44,7 +45,6 @@ public class SVGBubbleView extends ImageView {
 
     private static int MODE = NONE;
 
-    private Picture pic;
     private float movingDist;
 
     private ScaleGestureDetector mScaleDetector;
@@ -73,7 +73,7 @@ public class SVGBubbleView extends ImageView {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        SVG svg = SVGParser.getSVGFromResource(mContext.getResources(), R.raw.acid1_embedcss);
+        SVG svg = SVGParser.getSVGFromResource(mContext.getResources(), R.raw.cloud11cef);
         pic = svg.getPicture();
         canvas.drawColor(Color.BLUE);
         if (pic != null) {

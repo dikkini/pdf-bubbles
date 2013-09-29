@@ -139,7 +139,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.rectheart);
+                activeBubble.setBubbleDrawable(R.drawable.cloud112920);
             }
         });
 
@@ -151,7 +151,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.thunder);
+                activeBubble.setBubbleDrawable(R.drawable.rectthunder1920);
             }
         });
 
@@ -163,7 +163,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleDrawable(R.drawable.baloon11);
+                activeBubble.setBubbleDrawable(R.drawable.rectheart1920);
             }
         });
 
@@ -175,7 +175,7 @@ public class BubbleActivity extends Activity {
                     return;
                 }
                 activeBubble = activeBubble.getActiveBubble();
-                activeBubble.setBubbleSVG(R.raw.cloud11cef);
+                activeBubble.setBubbleDrawable(R.drawable.rectthunder19201);
             }
         });
 
