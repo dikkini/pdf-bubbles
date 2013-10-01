@@ -9,3 +9,4 @@
 magic.iml
 proguard-project.txt
 project.properties
+/target/
