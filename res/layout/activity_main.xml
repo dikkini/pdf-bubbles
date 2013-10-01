@@ -47,4 +47,9 @@
             android:layout_height="wrap_content"
             android:text="FingerPaint"
             android:id="@+id/main_finger_draw_button"/>
+    <Button
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="SVG Bubbles"
+            android:id="@+id/main_svg_bubbles_button"/>
 </LinearLayout>

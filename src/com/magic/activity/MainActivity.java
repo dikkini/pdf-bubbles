@@ -81,6 +81,15 @@ public class MainActivity extends Activity {
                 startActivity(galleryIntent);
             }
         });
+
+        Button svgBubblesBtn = (Button) findViewById(R.id.main_svg_bubbles_button);
+        svgBubblesBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent svgBubblesActivity = new Intent(getApplicationContext(), SVGActivity.class);
+                startActivity(svgBubblesActivity);
+            }
+        });
 	}
 
 	@Override

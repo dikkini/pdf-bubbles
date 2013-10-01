@@ -33,7 +33,8 @@
         <activity android:name=".activity.CutPhotoActivity"/>
         <activity android:name=".activity.FiguresActivity"/>
         <activity android:name=".drawgraphic.FingerPaint"/>
-        <activity android:hardwareAccelerated="false" android:name=".activity.DrawingActivity"/>
+        <activity android:name=".activity.DrawingActivity"/>
+        <activity android:name=".activity.SVGActivity"/>
     </application>
 
 </manifest>

@@ -8,10 +8,14 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Picture;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.drawable.PictureDrawable;
 import android.text.TextUtils;
 import android.util.FloatMath;
 import android.util.Log;
@@ -22,6 +26,8 @@ import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.larvalabs.svgandroid.SVG;
+import com.larvalabs.svgandroid.SVGParser;
 import com.magic.R;
 import com.magic.activity.BubbleSetAlphaSeekListener;
 import com.magic.activity.BubbleSetColorSeekListener;
@@ -50,6 +56,7 @@ public final class BubbleView extends ImageView {
     private Paint tailPaint = new Paint();
 
     private Bitmap image;
+    private Bitmap sourceImage;
     private Context mContext;
     private int mScreenHeight, mScreenWidth, prevY, prevX, mImageWidth, mImageHeight, mTouchSlop,
             mScaledImageWidth, mScaledImageHeight, prevTailX, prevTailY;
@@ -107,6 +114,12 @@ public final class BubbleView extends ImageView {
         mScreenWidth = imageView.getWidth();
         canImageMove = false;
 
+//        drawablePaint.setAntiAlias(true);
+//        drawablePaint.setFilterBitmap(false);
+//        drawablePaint.setDither(true);
+
+        drawableRect.setEmpty();
+
         if (bubbles != null) {
             this.bubbles = bubbles;
         } else {
@@ -122,24 +135,7 @@ public final class BubbleView extends ImageView {
     @Override
     public void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        // если изображение не установлено
-        if (image == null) {
-            drawablePaint.setStyle(Paint.Style.FILL);
-            drawablePaint.setColor(Color.WHITE);
-            if (mImagePosition == null) {
-                canvas.drawRect(10F, 10F, 10F, 10F, drawablePaint);
-                return;
-            }
-            canvas.drawRect(mImagePosition, textPaint);
-            return;
-        }
-
-        drawablePaint.setAntiAlias(true);
-        drawablePaint.setFilterBitmap(false);
-        drawablePaint.setDither(true);
-
-        drawableRect.setEmpty();
-        drawableRect.set(0, 0, image.getWidth(), image.getHeight());
+        drawableRect.set(0, 0, mImageWidth, mImageHeight);
         // рисуем рамку и пипку для управления хвостиком
         if (active) {
             drawStroke(canvas);
@@ -201,8 +197,7 @@ public final class BubbleView extends ImageView {
                         int deltaX = positionX - prevX;
                         int deltaY = positionY - prevY;
                         // Check if delta is added, is the rectangle is within the visible screen
-                        if ((mImagePosition.left + deltaX) > 0 && ((mImagePosition.right + deltaX) < mScreenWidth) &&
-                                (mImagePosition.top + deltaY) > 0 && ((mImagePosition.bottom + deltaY) < mScreenHeight)) {
+                        if (mImagePosition.left + deltaX > 0 && mImagePosition.top + deltaY > 0) {
                             // invalidate current position as we are moving...
                             mImagePosition.left = mImagePosition.left + deltaX;
                             mImagePosition.top = mImagePosition.top + deltaY;
@@ -254,7 +249,7 @@ public final class BubbleView extends ImageView {
                                 seekColor.setOnSeekBarChangeListener(new BubbleSetColorSeekListener(focusedBubble));
 
                                 focusedBubble.drawStroke();
-                                showActiveBubble(focusedBubble);
+                                showActiveBubble(focusedBubble.getBubbleId());
                                 return false;
                             }
                         }
@@ -279,10 +274,40 @@ public final class BubbleView extends ImageView {
         postInvalidate();
     }
 
+    public void setBubbleSVG(int drawableId) {
+        SVG svg = SVGParser.getSVGFromResource(getResources(), drawableId);
+        PictureDrawable pic = svg.createPictureDrawable();
+        Bitmap bm = Bitmap.createBitmap(pic.getIntrinsicWidth(), pic.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bm);
+        canvas.drawPicture(pic.getPicture());
+        image = bm;
+        sourceImage = bm;
+
+        if (mImagePosition == null) {
+            // начальные координаты изображения
+            int startYPosition = 10;
+            int startXPosition = 10;
+            mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
+            mImageRegion = new Region();
+        } else {
+            mImagePosition.right = mImageWidth;
+            mImagePosition.bottom = mImageHeight;
+            mScaledImageHeight = mImageHeight;
+            mScaledImageWidth = mImageWidth;
+            updateTextView();
+            scaleImage();
+        }
+
+        invalidate();
+    }
+
     public void setBubbleDrawable(int drawableId) {
         this.drawableId = drawableId;
         options = new BitmapFactory.Options();
         options.inScaled = false;
+        if (image != null) {
+            image.recycle();
+        }
         image = BitmapFactory.decodeResource(mContext.getResources(), drawableId, options);
         mImageHeight = image.getHeight();
         mImageWidth = image.getWidth();
@@ -292,10 +317,15 @@ public final class BubbleView extends ImageView {
             int startXPosition = 10;
             mImagePosition = new Rect(startXPosition, startYPosition, mImageWidth, mImageHeight);
             mImageRegion = new Region();
-            mImageRegion.set(mImagePosition);
+        } else {
+            mImagePosition.right = mImageWidth;
+            mImagePosition.bottom = mImageHeight;
+            mScaledImageHeight = mImageHeight;
+            mScaledImageWidth = mImageWidth;
+            updateTextView();
             scaleImage();
         }
-        updateTextView();
+
         invalidate();
     }
 
@@ -400,128 +430,23 @@ public final class BubbleView extends ImageView {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(textH, textW);
             int mathLine;
             int maxLines;
-            switch (drawableId) {
-                case R.drawable.custom_info_bubble:
-                    params.setMargins(getmImagePosition().left + 10, getmImagePosition().top + 10, 0, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = 1 + mathLine;
-                    break;
-                case R.drawable.speech_bubble:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-                // TODO продумать расположение текста
-                case R.drawable.rectheart:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-                case R.drawable.thunder:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-                case R.drawable.baloon11:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-                case R.drawable.cloud11:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-                case R.drawable.cloud12:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.arrow11:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.baloon12:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.baloon13:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.cardsclub:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.cardsdiamond:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.bottle11:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.elipsheart:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.elipsthunder:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.ghost:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.ghost12:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-
-                case R.drawable.cardsheart:
-                    params.setMargins(getmImagePosition().left + 30, getmImagePosition().top + 50, -20, 0);
-                    mathLine = mScaledImageHeight / 100;
-                    maxLines = mathLine;
-                    break;
-                default:
-                    maxLines = 1;
-                    break;
-
-            }
+            // TODO продумать расположение текста
+            params.setMargins(getmImagePosition().left + 10, getmImagePosition().top + 10, 0, 0);
+            mathLine = mScaledImageHeight / 100;
+            maxLines = 1 + mathLine;
 
             textView.setMaxLines(maxLines);
             textView.setEllipsize(TextUtils.TruncateAt.END);
             textView.setLayoutParams(params);
             textView.bringToFront();
             textView.postInvalidate();
-            postInvalidate();
         }
     }
 
     // удаляем обводку у всех баблов кроме того который в фокусе
-    public void showActiveBubble(BubbleView activeBubble) {
+    public void showActiveBubble(Integer bubbleId) {
         for (BubbleView bubble : bubbles) {
-            if (!bubble.getBubbleId().equals(activeBubble.getBubbleId())) {
+            if (!bubble.getBubbleId().equals(bubbleId)) {
                 bubble.removeStroke();
             }
         }
@@ -543,18 +468,16 @@ public final class BubbleView extends ImageView {
             mScaledImageWidth = maxScaleWidth;
         }*/
 
-        options.inTargetDensity = 0;
-
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        this.image.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-        byte[] bitmapdata = bos.toByteArray();
-        ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
-
-        this.image = BitmapFactory.decodeStream(bs, null, options);
+//        options.inTargetDensity = 0;
+//
+//        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+//        this.image.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+//        byte[] bitmapdata = bos.toByteArray();
+//        ByteArrayInputStream bs = new ByteArrayInputStream(bitmapdata);
+//
+//        this.image = BitmapFactory.decodeStream(bs, null, options);
         changeImagePosition();
 
-        mImageRegion.setEmpty();
-        mImageRegion.set(mImagePosition);
         updateTextView();
         invalidate();
     }
@@ -567,6 +490,7 @@ public final class BubbleView extends ImageView {
             mImagePosition.right = mImagePosition.left + mScaledImageWidth;
             mImagePosition.bottom = mImagePosition.top + mScaledImageHeight;
         }
+        mImageRegion.set(mImagePosition);
     }
 
     private void drawStroke(Canvas canvas) {
