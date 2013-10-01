@@ -213,6 +213,8 @@ public final class BubbleView extends ImageView {
                         // invalidate current position as we are moving...
                         mImagePosition.left = mImagePosition.left + deltaX;
                         mImagePosition.top = mImagePosition.top + deltaY;
+                        mImagePosition.right = mImagePosition.right + deltaX;
+                        mImagePosition.bottom = mImagePosition.bottom + deltaY;
 
                         prevX = positionX;
                         prevY = positionY;
@@ -223,8 +225,8 @@ public final class BubbleView extends ImageView {
                         int deltaX = positionX - prevX;
                         int deltaY = positionY - prevY;
 
-                        mScaledImageWidth +=deltaX;
-                        mScaledImageHeight +=deltaY;
+                        mImagePosition.top = mImagePosition.top + deltaY;
+                        mImagePosition.right = mImagePosition.right + deltaX;
 
                         prevX = positionX;
                         prevY = positionY;
@@ -308,10 +310,15 @@ public final class BubbleView extends ImageView {
 
         mImagePosition.right = mImageWidth/4;
         mImagePosition.bottom = mImageHeight/4;
-        mScaledImageHeight = mImageHeight/4;
-        mScaledImageWidth = mImageWidth/4;
+        mScaledImageHeight = mImageHeight;
+        mScaledImageWidth = mImageWidth;
 
-        changeImagePosition();
+        mImageRegion.set(mImagePosition);
+
+        Log.d(TAG, "setBubbleDrawable");
+
+        updateTextView();
+        invalidate();
     }
 
     private void drawTail(Canvas canvas) {
@@ -463,14 +470,9 @@ public final class BubbleView extends ImageView {
     }
 
     private void changeImagePosition() {
-        if (mScaledImageWidth == 0 && mScaledImageHeight == 0) {
-            mImagePosition.right = mImagePosition.left + mImageWidth;
-            mImagePosition.bottom = mImagePosition.top + mImageHeight;
-        } else {
-            mImagePosition.right = mImagePosition.left + mScaledImageWidth;
-            mImagePosition.bottom = mImagePosition.top + mScaledImageHeight;
+        if (mImagePosition != null) {
+            mImageRegion.set(mImagePosition);
         }
-        mImageRegion.set(mImagePosition);
 
         Log.d(TAG, "changeImagePosition");
 
