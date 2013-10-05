@@ -413,7 +413,9 @@ public final class BubbleView extends ImageView {
     }
 
     private void drawResizeButton(Canvas canvas) {
-        canvas.drawCircle(mImagePosition.right, mImagePosition.top, 40, tailPaint);
+        Paint resizeBtnPaint = new Paint();
+        resizeBtnPaint.setColor(Color.RED);
+        canvas.drawCircle(mImagePosition.right, mImagePosition.top, 40, resizeBtnPaint);
     }
 
     private void updateTextView() {
