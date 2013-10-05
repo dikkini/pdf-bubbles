@@ -329,17 +329,17 @@ public final class BubbleView extends ImageView {
         tailPaint.setStyle(Paint.Style.FILL);
         tailPaint.setStrokeWidth(5);
 
-        if (mScaledImageHeight == 0) {
-            mScaledImageHeight = mImageHeight;
-            mScaledImageWidth = mImageWidth;
-        }
+//        if (mScaledImageHeight == 0) {
+//            mScaledImageHeight = mImageHeight;
+//            mScaledImageWidth = mImageWidth;
+//        }
 
         int centerX = mScaledImageWidth/2;
 
         // TODO 50 - constant
         if ((tailLowXPoint == left+centerX || tailLowXPoint == 0) &&
                 (tailLowYPoint == bottom+50 || tailLowYPoint == 0)) {
-            tailLowXPoint = left+centerX;
+            tailLowXPoint = 100;
             tailLowYPoint = bottom+50;
         }
 
@@ -395,12 +395,18 @@ public final class BubbleView extends ImageView {
 //            Log.d(TAG, "IT IS RIGHT SIDE: tailLowXPoint > right && tailLowYPoint > top-70 && tailLowXPoint > bottom");
         }
 
-        Path fillPath = new Path();
-        fillPath.moveTo(startX1, startY1);
-        fillPath.lineTo(tailLowXPoint, tailLowYPoint);
-        fillPath.lineTo(startX2, startY2);
-
-        canvas.drawPath(fillPath, tailPaint);
+        //tail like a line
+        canvas.save();
+        canvas.rotate(3F);
+        canvas.drawLine(startX1, startY1, tailLowXPoint, tailLowYPoint, tailPaint);
+        canvas.restore();
+        // tail like a path
+//        Path fillPath = new Path();
+//        fillPath.moveTo(startX1, startY1);
+//        fillPath.lineTo(tailLowXPoint, tailLowYPoint);
+//        fillPath.lineTo(startX2, startY2);
+//
+//        canvas.drawPath(fillPath, tailPaint);
 
         if (drawCircleTail) {
             canvas.drawCircle(tailLowXPoint, tailLowYPoint, 10, tailPaint);
