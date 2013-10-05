@@ -181,12 +181,11 @@ public final class BubbleView extends ImageView {
                     MODE = TAIL;
                     Log.d(TAG, "MODE: TAIL");
                     break;
-                } else if (mImagePosition != null && mImagePosition.contains((int) mDownX, (int) mDownY)) {
+                } else if (mImagePosition.contains((int) mDownX, (int) mDownY)) {
                     MODE = DRAG;
                     Log.d(TAG, "MODE: DRAG");
                     break;
-                } else if (mImagePosition != null &&
-                        (isZoomX < 40 && isZoomY < 40) && (isZoomX > -40 && isZoomY > -40)) {
+                } else if ((isZoomX < 40 && isZoomY < 40) && (isZoomX > -40 && isZoomY > -40)) {
                     MODE = ZOOM;
                     Log.d(TAG, "MODE: ZOOM");
                 } else {
